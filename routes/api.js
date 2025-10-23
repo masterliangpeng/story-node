@@ -30,6 +30,7 @@ router.get('/', async (req, res, next) => {
 
     //用户选中的分类
     let activeCategoryId = req.cookies.activeCategoryId;
+    console.log('activeCategoryId',activeCategoryId);
     //用户勾选的设置
     let selectedCategoryIds = req.cookies.selectedCategoryIds;
 

@@ -70,8 +70,8 @@
                         <!-- 分类标签将通过API动态加载 -->
                         <% categoryList.forEach(function(category){ %>
                             <% const isActive = category.id === activeCategoryId; %>
-                            <li class="filter-tag <%= isActive ? 'active' : '' %> category-link" data-id="<%= category.id %>">
-                                <a class="tag-text" href="/api/list/<%=category.id%>/1"><%=category.name %></a>
+                            <li class="filter-tag <%= isActive ? 'active' : '' %> category-link">
+                                <a class="tag-text" href="/api/list/<%=category.id%>/1" data-id="<%= category.id %>"><%=category.name %></a>
                              </li>
                         <% }); %>
                     </ul>
