@@ -1,5 +1,29 @@
 const supabase = require('./supabase.js');
 
+exports.fetchCount = async (tableName,options = {})=>{
+    try{
+        let query = supabase.from(tableName).select('*', { count: 'exact', head: true });
+
+        if (options.filter) {
+            for (const [column, value] of Object.entries(options.filter)) {
+                query = query.eq(column, value);
+            }
+        }
+
+        // 执行查询
+        const { count, error } = await query;
+
+        if (error) {
+            throw error;
+        }
+
+        return { count: count, error: error };
+    }catch (error){
+        console.error('Supabase查询错误:', error);
+        return { data: null, error };
+    }
+};
+
 exports.fetchData = async (tableName, options = {})=>{
     try {
         //构建查询
