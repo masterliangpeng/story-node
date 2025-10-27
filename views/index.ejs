@@ -102,13 +102,12 @@
                  </article>
                  <% }); %>
 
-<!--                  <% if (page > 1) { %> -->
-<!--                                   <link rel="prev" href="/list/<%= categoryId %>/<%= page - 1 %>"> -->
-<!--                                   <% } %> -->
-<!--                   -->
-<!--                                   <% if (page < totalPages) { %> -->
-<!--                                   <link rel="next" href="/list/<%= categoryId %>/<%= page + 1 %>"> -->
-<!--                                   <% } %> -->
+                 <!-- 分页 -->
+                 <noscript>
+                     <% for(let i = 2; i <= totalPages; i++) { %>
+                         <a href="/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
+                     <% } %>
+                 </noscript>
             </div>
         </div>
     </main>
@@ -121,13 +120,7 @@
             <div></div>
         </div>
     </div>
-    <script>
-        window.ejsData = {
-            page: <%= page %>,
-            totalPages: <%= totalPages %>
-        };
-        console.log(<%= totalPages %>);
-    </script>
+
     <script src="/javascripts/main.js"></script>
   </body>
 </html>

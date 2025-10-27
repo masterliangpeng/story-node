@@ -8,8 +8,8 @@ let currentState = {
     categories: [],
     selectedCategoryIds: [], // 用户选择的分类ID列表
     searchKeyword: '',
-    isLoading: false,   // 是否正在加载数据
-    hasMoreData: true,   // 是否还有更多数据
+    isLoading: true,   // 是否正在加载数据
+    hasMoreData: false,   // 是否还有更多数据
     isSimpleMode: false,  // 是否为简约模式
     welcomeMsg:['欢迎来到《小故事铺》这里藏着一段段温暖的小故事，等你慢慢翻阅，慢慢收藏，和我们一起，在文字里遇见生活的温度',
         '欢迎光临《小故事铺》✨ 星光为笔，梦境作纸，每个故事，都藏着属于你的奇遇',
@@ -21,11 +21,31 @@ let currentState = {
         '欢迎光临《小故事铺》有些故事，白天不敢看，晚上别错过，深夜来访，胆小勿入']
 };
 
-document.addEventListener('DOMContentLoaded', ()=>{
+const elements = {
+    container: document.querySelector('.container')
+};
+
+document.addEventListener('DOMContentLoaded', async ()=>{
     showWelcomeAnimation();
-    // const activeCategoryId = getCookie('activeCategoryId');
-    // const count = fetchCount(activeCategoryId);
-    currentState.totalPages = window.ejsData.totalPages;
+
+    //todo activeCategoryId 不存在
+    const activeCategoryId = getCookie('activeCategoryId');
+    console.log('DOMContentLoaded:',activeCategoryId);
+    currentState.activeCategoryId = activeCategoryId;
+    const count = await fetchCount(activeCategoryId);
+
+    let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
+    console.log('totalPages=',totalPages);
+    currentState.totalPages = totalPages;
+    currentState.currentPage = 1;
+
+    //判断是否可以加载数据
+    currentState.hasMoreData = currentState.currentPage <= currentState.totalPages;
+    // 添加滚动事件监听
+    window.addEventListener('scroll', handleScroll);
+
+    //等DOMContentLoaded走完表示数据不处于加载中
+    currentState.isLoading = false;
 });
 
 document.querySelectorAll('.filter-tag a').forEach(a => {
@@ -37,16 +57,19 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
         if (!href) return;
         showLoading();
         const activeCategoryId = a.getAttribute('data-id');
+        currentState.activeCategoryId = activeCategoryId;
         document.cookie = 'activeCategoryId=' + activeCategoryId + '; path=/;';
         // 异步加载分类内容
         try {
-
             //设置总页数
-            // const count = fetchCount(activeCategoryId);
-            currentState.totalPages = window.ejsData.totalPages;
+            const count = await fetchCount(activeCategoryId);
+            let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
+            console.log('totalPages=',totalPages);
+            currentState.totalPages = totalPages;
+            currentState.currentPage = 1;
             const res = await fetch(href, { headers: { 'X-Partial': 'true' } });
             const html = await res.text();
-            document.querySelector('#storyGrid').innerHTML = html;
+            document.querySelector('#storyGrid').appendChild(html);
 
             // 更新浏览器地址（不会刷新页面）
             history.pushState(null, '', href);
@@ -77,7 +100,7 @@ document.querySelectorAll('.filter-tag').forEach(li => {
 });
 
 
-
+//欢迎页
 function showWelcomeAnimation() {
     const welcomeText = currentState.welcomeMsg[getRandomInt()];
     // 添加初始欢迎遮罩
@@ -96,19 +119,90 @@ function showWelcomeAnimation() {
 
     // 简单的加载动画后移除
     setTimeout(() => {
+        elements.container.style.display = 'block';
+        elements.container.style.opacity = '0';
+        elements.container.style.transform = 'translateY(20px)';
+
+        // 首页淡入动画
         welcomeOverlay.classList.add('welcome-fade');
         setTimeout(() => {
+            elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            elements.container.style.opacity = '1';
+            elements.container.style.transform = 'translateY(0)';
             document.body.removeChild(welcomeOverlay);
         }, 1000);
     }, 2000);
 }
 
-
-// async function fetchCount(categoryId) {
-//     const res = await fetch('/count/' + categoryId);
-//     const data = await res.json();
-//     return data.dataCount;
+// 显示故事详情页
+// function showArticle() {
+//     // 添加转场动画
+//     elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+//     elements.container.style.opacity = '0';
+//     elements.container.style.transform = 'translateY(-20px)';
+//
+//     setTimeout(() => {
+//         elements.container.style.display = 'none';
+//         elements.articleView.style.display = 'block';
+//
+//         // 详情页淡入动画
+//         elements.articleView.style.opacity = '0';
+//         elements.articleView.style.transform = 'translateY(20px)';
+//
+//         setTimeout(() => {
+//             elements.articleView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+//             elements.articleView.style.opacity = '1';
+//             elements.articleView.style.transform = 'translateY(0)';
+//
+//             // 平滑滚动到顶部
+//             window.scrollTo({
+//                 top: 0,
+//                 behavior: 'smooth'
+//             });
+//         }, 50);
+//     }, 500);
 // }
+
+
+// 监听滚动事件
+async function handleScroll() {
+    debugger
+    if(currentState.isLoading || !currentState.hasMoreData){
+        return;
+    }
+    console.log('我进来啦============');
+    // if(currentState.currentPage > currentState.totalPages){
+    //     return;
+    // }
+    //
+    // // 判断是否滚动到页面底部附近
+    // const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    // const windowHeight = window.innerHeight;
+    // const documentHeight = Math.max(
+    //     document.body.scrollHeight,
+    //     document.body.offsetHeight,
+    //     document.documentElement.clientHeight,
+    //     document.documentElement.scrollHeight,
+    //     document.documentElement.offsetHeight
+    // );
+    // showLoading();
+    // // 当滚动到距离底部300px以内时，加载下一页
+    // if (scrollTop + windowHeight > documentHeight - 300) {
+    //     currentState.currentPage++;
+    //     let href = '/list/' + currentState.activeCategoryId + '/' + currentState.currentPage;
+    //     const res = await fetch(href,{ headers: { 'X-Pagination': 'true' } });
+    //     const html = await res.text();
+    //     document.querySelector('#storyGrid').innerHTML = html;
+    // }
+    // hideLoading();
+}
+
+
+async function fetchCount(categoryId) {
+    const res = await fetch('/count/' + categoryId);
+    const data = await res.json();
+    return data.dataCount;
+}
 
 // 加载效果控制函数
 function showLoading() {

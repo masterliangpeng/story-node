@@ -21,10 +21,11 @@ router.get('/', async (req, res, next) => {
         let {data, error} = await supabase.fetchData('story_category', options);
         categoryList = data;
         if (data.length > 0) {
+            activeCategoryId = !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id;
             let options = {
                 orderBy: {column: 'id', ascending: true},
                 pagination: {page: 1, pageSize: pageMaxSize},
-                filter: {category_id: !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id}
+                filter: {category_id: activeCategoryId}
             };
             let {data, error} = await supabase.fetchData('story_main', options);
             storyList = data;
@@ -41,15 +42,15 @@ router.get('/', async (req, res, next) => {
     } else {
         categoryList = categoryList.slice(0, 7);
     }
-
     //故事总量
     let storyCount = await fetchCount(activeCategoryId);
     //总分页数
     let totalPages = Math.ceil(storyCount / pageMaxSize);
+
     res.render('index', {
         categoryList: categoryList,
         storyList: storyList,
-        activeCategoryId: !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id,
+        activeCategoryId: activeCategoryId,
         page: 1,
         totalPages: totalPages
     })
@@ -59,11 +60,13 @@ router.get('/', async (req, res, next) => {
 router.get('/list/:activeCategoryId/:page', async (req, res) => {
 
     let storyList;
+    let activeCategoryId = req.params.activeCategoryId;
+    let page = req.params.page;
     try {
         const options = {
             orderBy: {column: 'id', ascending: true},
-            pagination: {page: req.params.page, pageSize: pageMaxSize},
-            filter: {category_id: req.params.activeCategoryId}
+            pagination: {page: page, pageSize: pageMaxSize},
+            filter: {category_id: activeCategoryId}
         }
         let {data, error} = await supabase.fetchData('story_main', options);
         storyList = data;
@@ -74,46 +77,51 @@ router.get('/list/:activeCategoryId/:page', async (req, res) => {
         console.log(error);
     }
     //故事总量
-    let storyCount = await fetchCount(req.params.activeCategoryId);
+    let storyCount = await fetchCount(activeCategoryId);
     //总分页数
     let totalPages = Math.ceil(storyCount / pageMaxSize);
     console.log(storyCount);
     console.log(totalPages);
     // 切换分类做局部页面刷新
     if (req.headers['x-partial']) {
-        return res.render('main/story', {
+        return res.render('partial/story', {
             storyList: storyList,
-            page: req.params.page,
+            activeCategoryId: activeCategoryId,
+            page: page,
+            totalPages: totalPages
+        });
+    }else if(req.headers['x-pagination']){
+        return res.render('pagination/story', {
+            storyList: storyList,
+            activeCategoryId: activeCategoryId
+        });
+    }else{
+        let categoryList;
+        //用户勾选的设置
+        let selectedCategoryIds = req.cookies.selectedCategoryIds;
+        try {
+            let options = {
+                orderBy: {column: 'sort_id', ascending: false}
+            }
+            let {data, error} = await supabase.fetchData('story_category', options);
+            categoryList = data;
+        } catch (error) {
+            console.log(error);
+        }
+
+        if (!isNullOrUndefined(selectedCategoryIds)) {
+            categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
+        } else {
+            categoryList = categoryList.slice(0, 7);
+        }
+        res.render('index', {
+            categoryList: categoryList,
+            storyList: storyList,
+            activeCategoryId: activeCategoryId,
+            page: page,
             totalPages: totalPages
         });
     }
-
-    let categoryList;
-    //用户勾选的设置
-    let selectedCategoryIds = req.cookies.selectedCategoryIds;
-    try {
-        let options = {
-            orderBy: {column: 'sort_id', ascending: false}
-        }
-        let {data, error} = await supabase.fetchData('story_category', options);
-        categoryList = data;
-    } catch (error) {
-        console.log(error);
-    }
-
-    if (!isNullOrUndefined(selectedCategoryIds)) {
-        categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
-    } else {
-        categoryList = categoryList.slice(0, 7);
-    }
-    res.render('index', {
-        categoryList: categoryList,
-        storyList: storyList,
-        activeCategoryId: req.params.activeCategoryId,
-        page: req.params.page,
-        totalPages: totalPages
-    });
-
 });
 
 
