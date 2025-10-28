@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>小故事铺是一个专注于原创短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title>
+
+    <link rel="stylesheet" href="/stylesheets/read.css">
+
+    <link rel="stylesheet" href="/stylesheets/all.min.css">
+</head>
+
+<body>
+    <main class="main-container" id="mainContainer">
+        <div class="container">
+            <!-- 阅读页面视图 -->
+            <div class="article-view">
+                <div class="article-header">
+                    <button class="back-btn" onclick="showHome()">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回</span>
+                    </button>
+
+                    <h1 class="article-title" id="storyTitle"><%=storyTitle %></h1>
+
+                    <div class="article-meta">
+                        <div class="article-account">
+                            <div class="article-account-info">
+                                <div class="article-account-name" id="storyType"><%=categoryName %></div>
+                                <div class="article-date" id="storyReadTime"></div>
+                            </div>
+                        </div>
+
+                        <!-- 语音朗读控制按钮 -->
+                        <div class="tts-controls">
+                            <button class="tts-button" id="ttsPlayButton" title="开始朗读">
+                                <img src="/images/play.png" alt="开始朗读" class="play-icon">
+                            </button>
+
+                            <button class="tts-button" id="ttsReplayButton" title="重播">
+                                <img src="/images/replay.png" alt="重播" class="replay-icons">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-content" id="storyContent">
+                    <!-- 故事内容将通过API动态加载 -->
+                    <% contentList.forEach(function(content){ %>
+                        <p style="opacity: 1; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- 全局加载遮罩 -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-content">
+                    <div class="bouncing-loader">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>

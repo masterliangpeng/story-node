@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../public/javascripts/supabase-client');
 const pageMaxSize = 50;
+let defaultCategoryId = null;
 
 //初始化加载
 router.get('/', async (req, res, next) => {
@@ -18,9 +19,16 @@ router.get('/', async (req, res, next) => {
         let options = {
             orderBy: {column: 'sort_id', ascending: false}
         }
-        let {data, error} = await supabase.fetchData('story_category', options);
-        categoryList = data;
-        if (data.length > 0) {
+        if(!isNullOrUndefined(selectedCategoryIds)){
+
+
+        }else{
+            let {data, error} = await supabase.fetchData('story_category', options);
+            categoryList = data;
+            defaultCategoryId = categoryList[0].id;
+        }
+
+        if (categoryList.length > 0) {
             activeCategoryId = !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id;
             let options = {
                 orderBy: {column: 'id', ascending: true},
@@ -57,7 +65,7 @@ router.get('/', async (req, res, next) => {
 });
 
 //获取故事列表
-router.get('/list/:activeCategoryId/:page', async (req, res) => {
+router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
 
     let storyList;
     let activeCategoryId = req.params.activeCategoryId;
@@ -125,26 +133,46 @@ router.get('/list/:activeCategoryId/:page', async (req, res) => {
 });
 
 
+//获取默认分类id
+router.get('/story/initCategoryId', async (req,res)=>{
+    console.log(defaultCategoryId);
+    res.json({defaultCategoryId});
+})
+
+
 //获取当个故事
 router.get('/story/:id', async (req, res) => {
-    // 检测是否来自浏览器直接访问（刷新）
-    let story;
+    let storyMain;
+    try {
+        let options = {filter: {id: req.params.id}}
+        let {data, error} = await supabase.fetchData('story_main', options);
+        storyMain = data[0];
+    } catch (error) {
+        console.log(error);
+    }
+
+    let storyContent;
     try {
         let options = {filter: {story_id: req.params.id}}
         let {data, error} = await supabase.fetchData('story_content', options);
-        story = data;
+        storyContent = data[0];
         if (error) {
             throw new Error(error);
         }
     } catch (error) {
         console.log(error);
     }
-    res.render('read', {story: story});
+    const contentList = storyContent.content.split('\n').filter(p => p.trim() !== '');
+    res.render('read', {
+        contentList: contentList,
+        storyTitle: storyMain.title,
+        categoryName: storyMain.category_name,
+    });
 });
 
 
 //获取故事总量
-router.get('/count/:activeCategoryId/', async (req, res) => {
+router.get('/story/count/:activeCategoryId', async (req, res) => {
     let dataCount;
     try {
         const options = {

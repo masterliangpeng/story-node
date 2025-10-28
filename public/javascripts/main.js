@@ -28,8 +28,13 @@ const elements = {
 document.addEventListener('DOMContentLoaded', async ()=>{
     showWelcomeAnimation();
 
-    //todo activeCategoryId 不存在
-    const activeCategoryId = getCookie('activeCategoryId');
+    let activeCategoryId = getCookie('activeCategoryId');
+    if(typeof activeCategoryId === 'undefined' || activeCategoryId === null || activeCategoryId === ''){
+        const res= await fetch('/story/initCategoryId');
+        const result = await res.json();
+        activeCategoryId = result.defaultCategoryId;
+    }
+
     console.log('DOMContentLoaded:',activeCategoryId);
     currentState.activeCategoryId = activeCategoryId;
     const count = await fetchCount(activeCategoryId);
@@ -43,9 +48,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     currentState.hasMoreData = currentState.currentPage <= currentState.totalPages;
     // 添加滚动事件监听
     window.addEventListener('scroll', handleScroll);
-
-    //等DOMContentLoaded走完表示数据不处于加载中
-    currentState.isLoading = false;
 });
 
 document.querySelectorAll('.filter-tag a').forEach(a => {
@@ -69,7 +71,7 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
             currentState.currentPage = 1;
             const res = await fetch(href, { headers: { 'X-Partial': 'true' } });
             const html = await res.text();
-            document.querySelector('#storyGrid').appendChild(html);
+            document.querySelector('#storyGrid').innerHTML = html;
 
             // 更新浏览器地址（不会刷新页面）
             history.pushState(null, '', href);
@@ -83,7 +85,7 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
         }finally {
             setTimeout(()=>{
                 hideLoading();
-            },800)
+            },500)
         }
     });
 });
@@ -116,7 +118,6 @@ function showWelcomeAnimation() {
         </div>
     `;
     document.body.appendChild(welcomeOverlay);
-
     // 简单的加载动画后移除
     setTimeout(() => {
         elements.container.style.display = 'block';
@@ -125,81 +126,56 @@ function showWelcomeAnimation() {
 
         // 首页淡入动画
         welcomeOverlay.classList.add('welcome-fade');
+        showLoading();
         setTimeout(() => {
             elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
             elements.container.style.opacity = '1';
             elements.container.style.transform = 'translateY(0)';
             document.body.removeChild(welcomeOverlay);
+            //等DOMContentLoaded走完表示数据不处于加载中
+            currentState.isLoading = false;
+            hideLoading();
         }, 1000);
     }, 2000);
 }
 
-// 显示故事详情页
-// function showArticle() {
-//     // 添加转场动画
-//     elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-//     elements.container.style.opacity = '0';
-//     elements.container.style.transform = 'translateY(-20px)';
-//
-//     setTimeout(() => {
-//         elements.container.style.display = 'none';
-//         elements.articleView.style.display = 'block';
-//
-//         // 详情页淡入动画
-//         elements.articleView.style.opacity = '0';
-//         elements.articleView.style.transform = 'translateY(20px)';
-//
-//         setTimeout(() => {
-//             elements.articleView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-//             elements.articleView.style.opacity = '1';
-//             elements.articleView.style.transform = 'translateY(0)';
-//
-//             // 平滑滚动到顶部
-//             window.scrollTo({
-//                 top: 0,
-//                 behavior: 'smooth'
-//             });
-//         }, 50);
-//     }, 500);
-// }
-
 
 // 监听滚动事件
 async function handleScroll() {
-    debugger
+    console.log('currentState.isLoading',currentState.isLoading);
+    console.log('currentState.hasMoreData',!currentState.hasMoreData)
     if(currentState.isLoading || !currentState.hasMoreData){
         return;
     }
     console.log('我进来啦============');
-    // if(currentState.currentPage > currentState.totalPages){
-    //     return;
-    // }
-    //
+
     // // 判断是否滚动到页面底部附近
-    // const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    // const windowHeight = window.innerHeight;
-    // const documentHeight = Math.max(
-    //     document.body.scrollHeight,
-    //     document.body.offsetHeight,
-    //     document.documentElement.clientHeight,
-    //     document.documentElement.scrollHeight,
-    //     document.documentElement.offsetHeight
-    // );
-    // showLoading();
-    // // 当滚动到距离底部300px以内时，加载下一页
-    // if (scrollTop + windowHeight > documentHeight - 300) {
-    //     currentState.currentPage++;
-    //     let href = '/list/' + currentState.activeCategoryId + '/' + currentState.currentPage;
-    //     const res = await fetch(href,{ headers: { 'X-Pagination': 'true' } });
-    //     const html = await res.text();
-    //     document.querySelector('#storyGrid').innerHTML = html;
-    // }
-    // hideLoading();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = Math.max(
+        document.body.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.clientHeight,
+        document.documentElement.scrollHeight,
+        document.documentElement.offsetHeight
+    );
+    showLoading();
+    debugger
+    // 当滚动到距离底部300px以内时，加载下一页
+    if (scrollTop + windowHeight > documentHeight - 300) {
+        currentState.isLoading = true;
+        currentState.currentPage++;
+        let href = '/story/list/' + currentState.activeCategoryId + '/' + currentState.currentPage;
+        const res = await fetch(href,{ headers: { 'X-Pagination': 'true' } });
+        const html = await res.text();
+        document.querySelector('#storyGrid').insertAdjacentHTML('beforeend',html);
+    }
+    hideLoading();
 }
 
 
 async function fetchCount(categoryId) {
-    const res = await fetch('/count/' + categoryId);
+    const res = await fetch('/story/count/' + categoryId);
     const data = await res.json();
     return data.dataCount;
 }
@@ -239,6 +215,34 @@ function getRandomInt() {
     return Math.floor(Math.random() * 7);
 }
 
+// 显示故事详情页
+// function showArticle() {
+//     // 添加转场动画
+//     elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+//     elements.container.style.opacity = '0';
+//     elements.container.style.transform = 'translateY(-20px)';
+//
+//     setTimeout(() => {
+//         elements.container.style.display = 'none';
+//         elements.articleView.style.display = 'block';
+//
+//         // 详情页淡入动画
+//         elements.articleView.style.opacity = '0';
+//         elements.articleView.style.transform = 'translateY(20px)';
+//
+//         setTimeout(() => {
+//             elements.articleView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+//             elements.articleView.style.opacity = '1';
+//             elements.articleView.style.transform = 'translateY(0)';
+//
+//             // 平滑滚动到顶部
+//             window.scrollTo({
+//                 top: 0,
+//                 behavior: 'smooth'
+//             });
+//         }, 50);
+//     }, 500);
+// }
 
 // 支持浏览器回退
 // window.addEventListener('popstate', async () => {
