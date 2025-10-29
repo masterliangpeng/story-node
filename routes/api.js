@@ -99,9 +99,8 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
             totalPages: totalPages
         });
     }else if(req.headers['x-pagination']){
-        return res.render('pagination/story', {
-            storyList: storyList,
-            activeCategoryId: activeCategoryId
+        return res.json({
+            storyList: storyList
         });
     }else{
         let categoryList;

@@ -21,6 +21,15 @@ let currentState = {
         '欢迎光临《小故事铺》有些故事，白天不敢看，晚上别错过，深夜来访，胆小勿入']
 };
 
+const sidebarElements = {
+    sidebar: document.getElementById('sidebar'),
+    sidebarToggle: document.getElementById('sidebarToggle'),
+    sidebarClose: document.getElementById('sidebarClose'),
+    multiFunctionButton: document.getElementById('multiFunctionButton'),
+    functionDropdown: document.getElementById('functionDropdown'),
+    mainContainer: document.getElementById('mainContainer')
+};
+
 document.addEventListener('DOMContentLoaded', async ()=>{
     showWelcomeAnimation();
 
@@ -84,6 +93,7 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
 
             //添加动画
             showStoryCardAnimation();
+
         } catch (err) {
             console.error('加载分类内容失败:', err);
         }finally {
@@ -171,35 +181,50 @@ async function loadMoreStories() {
         }
 
         // 获取下一页数据
-        const response = await fetch('/story/list/'+currentState.activeCategoryId+'/'+nextPage, {
+        const res = await fetch('/story/list/'+currentState.activeCategoryId+'/'+nextPage, {
             headers: { 'X-pagination': 'true' }
         });
 
-        if (!response.ok) {
+        if (!res.ok) {
             throw new Error('网络请求失败');
         }
 
-        const html = await response.text();
+        const data = await res.json();
+        const storyList = data.storyList;
+        let html = '';
+        for (const story of storyList) {
+            html += `
+                <article class="content-card">
+                    <div class="card-info">
+                        <span class="card-category">${story.category_name}</span>
+                        <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’>${story.title}</a></h3>
+                        <p class="card-excerpt">${story.excerpt}</p>
+                        <div class="card-meta">
+                            <div class="account-name">${story.category_name}</div>
+                            <div class="card-stats">
+                                <span><i class="far fa-file-alt"></i>${story.length}字</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
 
-        // 解析HTML并提取故事卡片
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        const newCards = tempDiv.querySelectorAll('.content-card');
+        document.getElementById('storyGrid').insertAdjacentHTML('beforeend', html);
 
-        // 将新卡片添加到现有网格中
-        const storyGrid = document.getElementById('storyGrid');
-        newCards.forEach((card, index) => {
-            // 设置初始状态为隐藏
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-            storyGrid.appendChild(card);
-
-            // 添加淡入动画
-            setTimeout(() => {
-                card.classList.add('fade-in');
-            }, index * 100);
-        });
+        // 为新添加的卡片添加淡入动画
+        // const cards = document.getElementById('storyGrid').querySelectorAll('.content-card');
+        // const startIndex= (nextPage - 1) * PAGE_MAX_SIZE;
+        // for (let i = startIndex; i < cards.length; i++) {
+        //     const card = cards[i];
+        //     card.style.opacity = '0';
+        //     card.style.transform = 'translateY(20px)';
+        //     setTimeout(() => {
+        //         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        //         card.style.opacity = '1';
+        //         card.style.transform = 'translateY(0)';
+        //     }, 30 * (i - startIndex));
+        // }
 
         // 更新状态
         currentState.currentPage = nextPage;
@@ -211,9 +236,7 @@ async function loadMoreStories() {
         console.error('加载更多故事失败:', error);
     } finally {
         currentState.isLoading = false;
-        setTimeout(() => {
-            hideLoading();
-        }, 500);
+        hideLoading();
     }
 }
 
@@ -224,19 +247,21 @@ async function fetchCount(categoryId) {
     return data.dataCount;
 }
 
-// 加载效果控制函数
+
 function showLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.classList.add('show');
-    }
+    document.getElementById('loadingOverlay').classList.add('active');
 }
 
-function hideLoading() {
+// 隐藏加载遮罩
+function hideLoading(i) {
+    // 添加淡出动画效果
     const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.classList.remove('show');
-    }
+    loadingOverlay.classList.add('fade-out');
+
+    setTimeout(() => {
+        loadingOverlay.classList.remove('active');
+        loadingOverlay.classList.remove('fade-out');
+    }, 200);
 }
 
 function getCookie(cookieName){
@@ -270,8 +295,11 @@ function showStoryCardAnimation(){
             card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
-        }, 40 * (i - 0));
+        }, 40 * i);
     }
+
+    //滚动条复原
+    window.scrollTo(0, 0);
 }
 
 // 支持浏览器回退
