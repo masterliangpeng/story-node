@@ -21,10 +21,6 @@ let currentState = {
         '欢迎光临《小故事铺》有些故事，白天不敢看，晚上别错过，深夜来访，胆小勿入']
 };
 
-const elements = {
-    container: document.querySelector('.container')
-};
-
 document.addEventListener('DOMContentLoaded', async ()=>{
     showWelcomeAnimation();
 
@@ -45,9 +41,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     currentState.currentPage = 1;
 
     //判断是否可以加载数据
-    currentState.hasMoreData = currentState.currentPage <= currentState.totalPages;
+    currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
     // 添加滚动事件监听
     window.addEventListener('scroll', handleScroll);
+
+    // 为新添加的卡片添加淡入动画
+    showStoryCardAnimation();
 });
 
 document.querySelectorAll('.filter-tag a').forEach(a => {
@@ -69,6 +68,9 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
             console.log('totalPages=',totalPages);
             currentState.totalPages = totalPages;
             currentState.currentPage = 1;
+            // 重置分页状态
+            currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
+
             const res = await fetch(href, { headers: { 'X-Partial': 'true' } });
             const html = await res.text();
             document.querySelector('#storyGrid').innerHTML = html;
@@ -80,12 +82,12 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
             document.querySelectorAll('.filter-tag').forEach(li => li.classList.remove('active'));
             a.closest('.filter-tag').classList.add('active');
 
+            //添加动画
+            showStoryCardAnimation();
         } catch (err) {
             console.error('加载分类内容失败:', err);
         }finally {
-            setTimeout(()=>{
-                hideLoading();
-            },500)
+            hideLoading();
         }
     });
 });
@@ -120,21 +122,12 @@ function showWelcomeAnimation() {
     document.body.appendChild(welcomeOverlay);
     // 简单的加载动画后移除
     setTimeout(() => {
-        elements.container.style.display = 'block';
-        elements.container.style.opacity = '0';
-        elements.container.style.transform = 'translateY(20px)';
-
         // 首页淡入动画
         welcomeOverlay.classList.add('welcome-fade');
-        showLoading();
         setTimeout(() => {
-            elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            elements.container.style.opacity = '1';
-            elements.container.style.transform = 'translateY(0)';
             document.body.removeChild(welcomeOverlay);
             //等DOMContentLoaded走完表示数据不处于加载中
             currentState.isLoading = false;
-            hideLoading();
         }, 1000);
     }, 2000);
 }
@@ -142,35 +135,86 @@ function showWelcomeAnimation() {
 
 // 监听滚动事件
 async function handleScroll() {
-    console.log('currentState.isLoading',currentState.isLoading);
-    console.log('currentState.hasMoreData',!currentState.hasMoreData)
-    if(currentState.isLoading || !currentState.hasMoreData){
+    // 防抖处理，避免频繁触发
+    if (currentState.isLoading || !currentState.hasMoreData) {
         return;
     }
-    console.log('我进来啦============');
 
-    // // 判断是否滚动到页面底部附近
+    // 获取滚动位置
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
-    const documentHeight = Math.max(
-        document.body.scrollHeight,
-        document.body.offsetHeight,
-        document.documentElement.clientHeight,
-        document.documentElement.scrollHeight,
-        document.documentElement.offsetHeight
-    );
-    showLoading();
-    debugger
-    // 当滚动到距离底部300px以内时，加载下一页
-    if (scrollTop + windowHeight > documentHeight - 300) {
-        currentState.isLoading = true;
-        currentState.currentPage++;
-        let href = '/story/list/' + currentState.activeCategoryId + '/' + currentState.currentPage;
-        const res = await fetch(href,{ headers: { 'X-Pagination': 'true' } });
-        const html = await res.text();
-        document.querySelector('#storyGrid').insertAdjacentHTML('beforeend',html);
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // 当滚动到距离底部200px时触发加载
+    if (scrollTop + windowHeight >= documentHeight - 200) {
+        await loadMoreStories();
     }
-    hideLoading();
+}
+
+// 加载更多故事
+async function loadMoreStories() {
+    if (currentState.isLoading || !currentState.hasMoreData) {
+        return;
+    }
+
+    currentState.isLoading = true;
+    showLoading();
+
+    try {
+        // 计算下一页
+        const nextPage = currentState.currentPage + 1;
+
+        // 检查是否还有更多数据
+        if (nextPage > currentState.totalPages) {
+            currentState.hasMoreData = false;
+            return;
+        }
+
+        // 获取下一页数据
+        const response = await fetch('/story/list/'+currentState.activeCategoryId+'/'+nextPage, {
+            headers: { 'X-pagination': 'true' }
+        });
+
+        if (!response.ok) {
+            throw new Error('网络请求失败');
+        }
+
+        const html = await response.text();
+
+        // 解析HTML并提取故事卡片
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const newCards = tempDiv.querySelectorAll('.content-card');
+
+        // 将新卡片添加到现有网格中
+        const storyGrid = document.getElementById('storyGrid');
+        newCards.forEach((card, index) => {
+            // 设置初始状态为隐藏
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            storyGrid.appendChild(card);
+
+            // 添加淡入动画
+            setTimeout(() => {
+                card.classList.add('fade-in');
+            }, index * 100);
+        });
+
+        // 更新状态
+        currentState.currentPage = nextPage;
+        currentState.hasMoreData = nextPage < currentState.totalPages;
+
+        console.log(`已加载第 ${nextPage} 页，共 ${currentState.totalPages} 页`);
+
+    } catch (error) {
+        console.error('加载更多故事失败:', error);
+    } finally {
+        currentState.isLoading = false;
+        setTimeout(() => {
+            hideLoading();
+        }, 500);
+    }
 }
 
 
@@ -215,34 +259,20 @@ function getRandomInt() {
     return Math.floor(Math.random() * 7);
 }
 
-// 显示故事详情页
-// function showArticle() {
-//     // 添加转场动画
-//     elements.container.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-//     elements.container.style.opacity = '0';
-//     elements.container.style.transform = 'translateY(-20px)';
-//
-//     setTimeout(() => {
-//         elements.container.style.display = 'none';
-//         elements.articleView.style.display = 'block';
-//
-//         // 详情页淡入动画
-//         elements.articleView.style.opacity = '0';
-//         elements.articleView.style.transform = 'translateY(20px)';
-//
-//         setTimeout(() => {
-//             elements.articleView.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-//             elements.articleView.style.opacity = '1';
-//             elements.articleView.style.transform = 'translateY(0)';
-//
-//             // 平滑滚动到顶部
-//             window.scrollTo({
-//                 top: 0,
-//                 behavior: 'smooth'
-//             });
-//         }, 50);
-//     }, 500);
-// }
+function showStoryCardAnimation(){
+    // 为新添加的卡片添加淡入动画
+    const cards = document.getElementById('storyGrid').querySelectorAll('.content-card');
+    for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 40 * (i - 0));
+    }
+}
 
 // 支持浏览器回退
 // window.addEventListener('popstate', async () => {

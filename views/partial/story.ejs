@@ -2,7 +2,7 @@
 <article class="content-card">
      <div class="card-info">
          <span class="card-category"><%=story.category_name %></span>
-         <h3 class="card-title"><%=story.title %></h3>
+         <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
          <p class="card-excerpt"><%=story.excerpt %></p>
          <div class="card-meta">
              <div class="account-name"><%=story.category_name %></div>

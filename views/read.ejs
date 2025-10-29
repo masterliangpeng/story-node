@@ -15,7 +15,7 @@
             <!-- 阅读页面视图 -->
             <div class="article-view">
                 <div class="article-header">
-                    <button class="back-btn" onclick="showHome()">
+                    <button class="back-btn">
                         <i class="fas fa-arrow-left"></i>
                         <span>返回</span>
                     </button>
@@ -43,26 +43,30 @@
                     </div>
                 </div>
 
-                <div class="article-content" id="storyContent">
-                    <!-- 故事内容将通过API动态加载 -->
-                    <% contentList.forEach(function(content){ %>
-                        <p style="opacity: 1; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p>
-                    <% }); %>
-                </div>
+                <div class="article-content" id="storyContent"><% contentList.forEach(function(content){ %><p style="opacity: 1; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p><% }); %></div>
             </div>
-
-            <!-- 全局加载遮罩 -->
-            <div class="loading-overlay" id="loadingOverlay">
-                <div class="loading-content">
-                    <div class="bouncing-loader">
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const pElementList = document.getElementById('storyContent').querySelectorAll('p');
+            pElementList.forEach((p)=>{
+                p.style.opacity = '0';
+                p.style.transform = 'translateY(10px)';
+            })
+
+            pElementList.forEach((p, index) => {
+                setTimeout(() => {
+                    // 短暂延迟后显示段落
+                    setTimeout(() => {
+                        p.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        p.style.opacity = '1';
+                        p.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 100 * Math.min(index, 5)); // 最多延迟5段，防止过长的故事有太长的加载时间
+            });
+
+        })
+    </script>
 </body>
 </html>

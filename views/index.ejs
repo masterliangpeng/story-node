@@ -83,32 +83,30 @@
 
     <!-- 主内容区域 -->
     <main class="main-container" id="mainContainer">
-        <div class="container">
-            <div class="content-grid" id="storyGrid">
-                <!-- 故事卡片将通过动态加载 -->
-                <% storyList.forEach(function(story){ %>
-                <article class="content-card">
-                     <div class="card-info">
-                         <span class="card-category"><%=story.category_name %></span>
-                         <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
-                         <p class="card-excerpt"><%=story.excerpt %></p>
-                         <div class="card-meta">
-                             <div class="account-name"><%=story.category_name %></div>
-                             <div class="card-stats">
-                                 <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
-                             </div>
+        <div class="content-grid" id="storyGrid">
+            <!-- 故事卡片将通过动态加载 -->
+            <% storyList.forEach(function(story){ %>
+            <article class="content-card">
+                 <div class="card-info">
+                     <span class="card-category"><%=story.category_name %></span>
+                     <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
+                     <p class="card-excerpt"><%=story.excerpt %></p>
+                     <div class="card-meta">
+                         <div class="account-name"><%=story.category_name %></div>
+                         <div class="card-stats">
+                             <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
                          </div>
                      </div>
-                 </article>
-                 <% }); %>
+                 </div>
+             </article>
+             <% }); %>
 
-                 <!-- 分页 -->
-                 <noscript>
-                     <% for(let i = 2; i <= totalPages; i++) { %>
-                         <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
-                     <% } %>
-                 </noscript>
-            </div>
+             <!-- 分页 -->
+             <noscript>
+                 <% for(let i = 2; i <= totalPages; i++) { %>
+                     <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
+                 <% } %>
+             </noscript>
         </div>
     </main>
 
