@@ -36,6 +36,12 @@ exports.fetchData = async (tableName, options = {})=>{
             }
         }
 
+        if (options.filterIn) {
+            for (const [column, value] of Object.entries(options.filterIn)) {
+                query = query.in(column, value);
+            }
+        }
+
         // 添加过滤条件
         if (options.filterLike) {
             for (const [column, value] of Object.entries(options.filterLike)) {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('../public/javascripts/supabase-client');
+const supabase = require('./supabase-client');
 const pageMaxSize = 50;
 let defaultCategoryId = null;
 let defaultCategoryIds = [];
@@ -18,16 +18,15 @@ router.get('/', async (req, res, next) => {
     try {
         //todo判断cookie中是否存在已选中的分类，如果选中，则使用选中的分类加载数据，且分类也要选中
         let options = {
-            orderBy: {column: 'sort_id', ascending: false}
+            orderBy: {column: 'sort_id', ascending: false},
         }
-        if(!isNullOrUndefined(selectedCategoryIds)){
-
-
-        }else{
-            let {data, error} = await supabase.fetchData('story_category', options);
-            categoryList = data;
-            initCategoryId(categoryList);
+        if (!isNullOrUndefined(selectedCategoryIds)) {
+            options.filterIn = {'id': JSON.parse(selectedCategoryIds)};
         }
+
+        let {data, error} = await supabase.fetchData('story_category', options);
+        categoryList = data;
+        initCategoryId(categoryList);
 
         if (categoryList.length > 0) {
             activeCategoryId = !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id;
@@ -46,11 +45,10 @@ router.get('/', async (req, res, next) => {
         console.log(error);
     }
 
-    if (!isNullOrUndefined(selectedCategoryIds)) {
-        categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
-    } else {
+    if (isNullOrUndefined(selectedCategoryIds)) {
         categoryList = categoryList.slice(0, 10);
     }
+
     //故事总量
     let storyCount = await fetchCount(activeCategoryId);
     //总分页数
@@ -89,8 +87,6 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
     let storyCount = await fetchCount(activeCategoryId);
     //总分页数
     let totalPages = Math.ceil(storyCount / pageMaxSize);
-    console.log(storyCount);
-    console.log(totalPages);
     // 切换分类做局部页面刷新
     if (req.headers['x-partial']) {
         return res.render('partial/story', {
@@ -99,11 +95,11 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
             page: page,
             totalPages: totalPages
         });
-    }else if(req.headers['x-pagination']){
+    } else if (req.headers['x-pagination']) {
         return res.json({
             storyList: storyList
         });
-    }else{
+    } else {
         let categoryList;
         //用户勾选的设置
         let selectedCategoryIds = req.cookies.selectedCategoryIds;
@@ -135,8 +131,8 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
 
 
 //获取默认分类id
-router.get('/story/initCategoryId', async (req,res)=>{
-    res.json({defaultCategoryId,defaultCategoryIds});
+router.get('/story/initCategoryId', async (req, res) => {
+    res.json({defaultCategoryId, defaultCategoryIds});
 })
 
 
@@ -186,9 +182,25 @@ router.get('/story/count/:activeCategoryId', async (req, res) => {
     } catch (error) {
         console.log(error);
     }
-
     res.json({dataCount});
+});
 
+//获取所有分类
+router.get('/story/all/category', async (req, res) => {
+    let categoryList;
+    try {
+        let options = {
+            orderBy: {column: 'sort_id', ascending: false}
+        }
+        let {data, error} = await supabase.fetchData('story_category', options);
+        categoryList = data;
+        if (error) {
+            throw new Error(error);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+    res.json({categoryList});
 });
 
 async function fetchCount(categoryId) {
@@ -208,14 +220,15 @@ async function fetchCount(categoryId) {
     return dataCount;
 }
 
-function initCategoryId(categoryList){
-    if(defaultCategoryId === null){
+function initCategoryId(categoryList) {
+    if (defaultCategoryId === null) {
         defaultCategoryId = categoryList[0].id;
     }
-    if(defaultCategoryIds.length == 0){
-        defaultCategoryIds = [categoryList[0].id,categoryList[1].id,categoryList[2].id,categoryList[3].id,categoryList[4].id,categoryList[5].id,categoryList[6].id,categoryList[7].id,categoryList[8].id,categoryList[9].id];
+    if (defaultCategoryIds.length == 0) {
+        defaultCategoryIds = [categoryList[0].id, categoryList[1].id, categoryList[2].id, categoryList[3].id, categoryList[4].id, categoryList[5].id, categoryList[6].id, categoryList[7].id, categoryList[8].id, categoryList[9].id];
     }
 }
+
 function isNullOrUndefined(value) {
     return typeof value === 'undefined' || value === null;
 }

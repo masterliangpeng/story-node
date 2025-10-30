@@ -1,4 +1,5 @@
 const PAGE_MAX_SIZE = 50;
+const MAX_NAV_CATEGORIES = 10; // 导航栏最多显示的分类数
 
 let currentState = {
     activeCategoryId: null, // 初始为null，加载后设为第一个分类的ID
@@ -348,9 +349,12 @@ function openCategorySettingsModal() {
 }
 
 // 填充分类设置内容
-function populateCategorySettings() {
+async function populateCategorySettings() {
     // 创建分类设置的视图容器
+    const categoryList = await fetchCategory();
+
     let selectedHTML = '';
+
     let unselectedHTML = '';
     const selectedCount = currentState.selectedCategoryIds.length;
 
@@ -423,6 +427,12 @@ function populateCategorySettings() {
 
     // 更新警告显示
     updateCategoryLimitWarning();
+}
+
+async function fetchCategory() {
+    const res = await fetch('/story/all/category');
+    const data = await res.json();
+    return data.categoryList;
 }
 
 
