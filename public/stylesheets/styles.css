@@ -668,6 +668,10 @@ h3.card-title {
     color: var(--primary-color);
 }
 
+.card-title a{
+    text-decoration: none;
+    color: #212121;
+}
 /* 故事摘要样式 */
 p.card-excerpt {
     font-size: 14px;

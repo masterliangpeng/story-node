@@ -8,10 +8,6 @@
   </head>
 
   <body class="simple-mode">
-    <!-- 侧边栏切换按钮（在收缩状态下可见） -->
-    <div class="sidebar-toggle" id="sidebarToggle">
-        <i class="fas fa-chevron-right"></i>
-    </div>
 
     <!-- 左侧侧边栏 -->
     <aside class="sidebar" id="sidebar">
@@ -94,34 +90,58 @@
 
     <!-- 主内容区域 -->
     <main class="main-container" id="mainContainer">
-    <div class='container'>
-        <div class="content-grid" id="storyGrid">
-            <!-- 故事卡片将通过动态加载 -->
-            <% storyList.forEach(function(story){ %>
-            <article class="content-card">
-                 <div class="card-info">
-                     <span class="card-category"><%=story.category_name %></span>
-                     <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
-                     <p class="card-excerpt"><%=story.excerpt %></p>
-                     <div class="card-meta">
-                         <div class="account-name"><%=story.category_name %></div>
-                         <div class="card-stats">
-                             <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+        <div class='container'>
+            <div class="content-grid" id="storyGrid">
+                <!-- 故事卡片将通过动态加载 -->
+                <% storyList.forEach(function(story){ %>
+                <article class="content-card">
+                     <div class="card-info">
+                         <span class="card-category"><%=story.category_name %></span>
+                         <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
+                         <p class="card-excerpt"><%=story.excerpt %></p>
+                         <div class="card-meta">
+                             <div class="account-name"><%=story.category_name %></div>
+                             <div class="card-stats">
+                                 <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+                             </div>
                          </div>
                      </div>
-                 </div>
-             </article>
-             <% }); %>
+                 </article>
+                 <% }); %>
 
-             <!-- 分页 -->
-             <noscript>
-                 <% for(let i = 2; i <= totalPages; i++) { %>
-                     <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
-                 <% } %>
-             </noscript>
-        </div>
+                 <!-- 分页 -->
+                 <noscript>
+                     <% for(let i = 2; i <= totalPages; i++) { %>
+                         <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
+                     <% } %>
+                 </noscript>
+            </div>
         </div>
     </main>
+
+    <!-- 侧边栏切换按钮（在收缩状态下可见） -->
+    <div class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-chevron-right"></i>
+    </div>
+
+    <!-- 分类设置弹窗 -->
+    <div class="category-settings-modal" id="categorySettingsModal">
+        <div class="category-settings-container">
+            <div class="settings-header">
+                <h3>分类设置</h3>
+                <button class="settings-close" id="settingsClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="settings-description">
+                选择您想在导航栏显示的分类（最多10个）
+            </div>
+            <div class="category-list" id="categorySettingsList">
+                <!-- 分类选择项将通过JS动态加载 -->
+            </div>
+        </div>
+    </div>
+
 
     <!-- 页面遮罩 -->
      <div class="loading-overlay" id="loadingOverlay">

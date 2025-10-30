@@ -3,6 +3,7 @@ const router = express.Router();
 const supabase = require('../public/javascripts/supabase-client');
 const pageMaxSize = 50;
 let defaultCategoryId = null;
+let defaultCategoryIds = [];
 
 //初始化加载
 router.get('/', async (req, res, next) => {
@@ -25,7 +26,7 @@ router.get('/', async (req, res, next) => {
         }else{
             let {data, error} = await supabase.fetchData('story_category', options);
             categoryList = data;
-            defaultCategoryId = categoryList[0].id;
+            initCategoryId(categoryList);
         }
 
         if (categoryList.length > 0) {
@@ -48,7 +49,7 @@ router.get('/', async (req, res, next) => {
     if (!isNullOrUndefined(selectedCategoryIds)) {
         categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
     } else {
-        categoryList = categoryList.slice(0, 7);
+        categoryList = categoryList.slice(0, 10);
     }
     //故事总量
     let storyCount = await fetchCount(activeCategoryId);
@@ -112,6 +113,7 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
             }
             let {data, error} = await supabase.fetchData('story_category', options);
             categoryList = data;
+            initCategoryId(categoryList);
         } catch (error) {
             console.log(error);
         }
@@ -119,7 +121,7 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
         if (!isNullOrUndefined(selectedCategoryIds)) {
             categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
         } else {
-            categoryList = categoryList.slice(0, 7);
+            categoryList = categoryList.slice(0, 10);
         }
         res.render('index', {
             categoryList: categoryList,
@@ -134,8 +136,7 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
 
 //获取默认分类id
 router.get('/story/initCategoryId', async (req,res)=>{
-    console.log(defaultCategoryId);
-    res.json({defaultCategoryId});
+    res.json({defaultCategoryId,defaultCategoryIds});
 })
 
 
@@ -207,6 +208,14 @@ async function fetchCount(categoryId) {
     return dataCount;
 }
 
+function initCategoryId(categoryList){
+    if(defaultCategoryId === null){
+        defaultCategoryId = categoryList[0].id;
+    }
+    if(defaultCategoryIds.length == 0){
+        defaultCategoryIds = [categoryList[0].id,categoryList[1].id,categoryList[2].id,categoryList[3].id,categoryList[4].id,categoryList[5].id,categoryList[6].id,categoryList[7].id,categoryList[8].id,categoryList[9].id];
+    }
+}
 function isNullOrUndefined(value) {
     return typeof value === 'undefined' || value === null;
 }
