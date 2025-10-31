@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('./supabase-client');
+const supabase = require('./server');
 const pageMaxSize = 50;
 let defaultCategoryId = null;
 let defaultCategoryIds = [];
@@ -16,7 +16,6 @@ router.get('/', async (req, res, next) => {
     let selectedCategoryIds = req.cookies.selectedCategoryIds;
 
     try {
-        //todo判断cookie中是否存在已选中的分类，如果选中，则使用选中的分类加载数据，且分类也要选中
         let options = {
             orderBy: {column: 'sort_id', ascending: false},
         }
@@ -26,10 +25,10 @@ router.get('/', async (req, res, next) => {
 
         let {data, error} = await supabase.fetchData('story_category', options);
         categoryList = data;
-        initCategoryId(categoryList);
+        initCategoryId(categoryList[0].id,categoryList);
 
         if (categoryList.length > 0) {
-            activeCategoryId = !isNullOrUndefined(activeCategoryId) ? activeCategoryId : categoryList[0].id;
+            activeCategoryId = !isNullOrUndefined(activeCategoryId) ? JSON.parse(activeCategoryId) : categoryList[0].id;
             let options = {
                 orderBy: {column: 'id', ascending: true},
                 pagination: {page: 1, pageSize: pageMaxSize},
@@ -65,7 +64,6 @@ router.get('/', async (req, res, next) => {
 
 //获取故事列表
 router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
-
     let storyList;
     let activeCategoryId = req.params.activeCategoryId;
     let page = req.params.page;
@@ -105,20 +103,30 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
         let selectedCategoryIds = req.cookies.selectedCategoryIds;
         try {
             let options = {
-                orderBy: {column: 'sort_id', ascending: false}
+                orderBy: {column: 'sort_id', ascending: false},
             }
+            if (!isNullOrUndefined(selectedCategoryIds)) {
+                options.filterIn = {'id': JSON.parse(selectedCategoryIds)};
+            }
+
             let {data, error} = await supabase.fetchData('story_category', options);
             categoryList = data;
-            initCategoryId(categoryList);
+            initCategoryId(activeCategoryId,categoryList);
         } catch (error) {
             console.log(error);
         }
 
-        if (!isNullOrUndefined(selectedCategoryIds)) {
-            categoryList = categoryList.filter(item => selectedCategoryIds.includes(item.id));
-        } else {
-            categoryList = categoryList.slice(0, 10);
+        if (isNullOrUndefined(selectedCategoryIds)) {
+            console.log('是否存在选中的id：',categoryList.slice(0, 10).some(item => activeCategoryId == item.id))
+            if(!categoryList.slice(0, 10).some(item => activeCategoryId == item.id)){
+                const activeCategory = categoryList.find(item => item.id == activeCategoryId);
+                console.log('查找的分类：',activeCategory);
+                categoryList = categoryList.slice(0, 9);
+                categoryList.push(activeCategory);
+                console.log('添加后的分类：',categoryList);
+            }
         }
+
         res.render('index', {
             categoryList: categoryList,
             storyList: storyList,
@@ -139,8 +147,9 @@ router.get('/story/initCategoryId', async (req, res) => {
 //获取当个故事
 router.get('/story/:id', async (req, res) => {
     let storyMain;
+    let id = JSON.parse(req.params.id);
     try {
-        let options = {filter: {id: req.params.id}}
+        let options = {filter: {id: id}}
         let {data, error} = await supabase.fetchData('story_main', options);
         storyMain = data[0];
     } catch (error) {
@@ -149,7 +158,7 @@ router.get('/story/:id', async (req, res) => {
 
     let storyContent;
     try {
-        let options = {filter: {story_id: req.params.id}}
+        let options = {filter: {story_id: id}}
         let {data, error} = await supabase.fetchData('story_content', options);
         storyContent = data[0];
         if (error) {
@@ -172,7 +181,7 @@ router.get('/story/count/:activeCategoryId', async (req, res) => {
     let dataCount;
     try {
         const options = {
-            filter: {category_id: req.params.activeCategoryId}
+            filter: {category_id: JSON.parse(req.params.activeCategoryId)}
         }
         let {count, error} = await supabase.fetchCount('story_main', options);
         dataCount = count;
@@ -220,9 +229,9 @@ async function fetchCount(categoryId) {
     return dataCount;
 }
 
-function initCategoryId(categoryList) {
+function initCategoryId(activeCategoryId,categoryList) {
     if (defaultCategoryId === null) {
-        defaultCategoryId = categoryList[0].id;
+        defaultCategoryId = activeCategoryId;
     }
     if (defaultCategoryIds.length == 0) {
         defaultCategoryIds = [categoryList[0].id, categoryList[1].id, categoryList[2].id, categoryList[3].id, categoryList[4].id, categoryList[5].id, categoryList[6].id, categoryList[7].id, categoryList[8].id, categoryList[9].id];

@@ -12,7 +12,7 @@ let currentState = {
     isLoading: true,   // 是否正在加载数据
     hasMoreData: false,   // 是否还有更多数据
     isSimpleMode: false,  // 是否为简约模式
-    welcomeMsg:['欢迎来到《小故事铺》这里藏着一段段温暖的小故事，等你慢慢翻阅，慢慢收藏，和我们一起，在文字里遇见生活的温度',
+    welcomeMsg: ['欢迎来到《小故事铺》这里藏着一段段温暖的小故事，等你慢慢翻阅，慢慢收藏，和我们一起，在文字里遇见生活的温度',
         '欢迎光临《小故事铺》✨ 星光为笔，梦境作纸，每个故事，都藏着属于你的奇遇',
         '欢迎来到小故事铺 这里的故事都在等你翻开',
         '小故事铺开门啦 今天也偷偷准备了几个温暖小故事',
@@ -27,6 +27,9 @@ const elements = {
     storyGrid: document.getElementById('storyGrid'),
     loadingOverlay: document.getElementById('loadingOverlay'),
     categorySettingsModal: document.getElementById('categorySettingsModal'),
+    categorySettingsList: document.getElementById('categorySettingsList'),
+    settingsClose: document.getElementById('settingsClose'),
+    categoryTags: document.getElementById('categoryTags'),
 };
 
 const sidebarElements = {
@@ -36,7 +39,8 @@ const sidebarElements = {
     categorySettingsButton: document.getElementById('categorySettingsButton'),
 };
 
-document.addEventListener('DOMContentLoaded', async ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('刷新进这里了');
     //欢迎动画
     showWelcomeAnimation();
 
@@ -45,18 +49,17 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
     let activeCategoryId = getCookie('activeCategoryId');
     let selectedCategoryIds = getCookie('selectedCategoryIds');
-    if(typeof activeCategoryId === 'undefined' || activeCategoryId === null || activeCategoryId === ''){
-        const res= await fetch('/story/initCategoryId');
+    if (typeof activeCategoryId === 'undefined' || activeCategoryId === null || activeCategoryId === '') {
+        const res = await fetch('/story/initCategoryId');
         const result = await res.json();
-        activeCategoryId = result.defaultCategoryId;
-        selectedCategoryIds = result.defaultCategoryIds;
+        activeCategoryId = JSON.stringify(result.defaultCategoryId);
+        selectedCategoryIds = JSON.stringify(result.defaultCategoryIds);
         document.cookie = 'activeCategoryId=' + activeCategoryId + '; path=/;';
-        document.cookie = 'selectedCategoryIds=' + JSON.stringify(selectedCategoryIds) + '; path=/;';
+        document.cookie = 'selectedCategoryIds=' + selectedCategoryIds + '; path=/;';
     }
-    currentState.activeCategoryId = activeCategoryId;
-    currentState.selectedCategoryIds = selectedCategoryIds;
-    console.log(getCookie('selectedCategoryIds'));
-    console.log(getCookie('activeCategoryId'));
+    currentState.activeCategoryId = JSON.parse(activeCategoryId);
+    currentState.selectedCategoryIds = JSON.parse(selectedCategoryIds);
+
     const count = await fetchCount(activeCategoryId);
     let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
     currentState.totalPages = totalPages;
@@ -89,13 +92,13 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
             //设置总页数
             const count = await fetchCount(activeCategoryId);
             let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
-            console.log('totalPages=',totalPages);
+            console.log('totalPages=', totalPages);
             currentState.totalPages = totalPages;
             currentState.currentPage = 1;
             // 重置分页状态
             currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
 
-            const res = await fetch(href, { headers: { 'X-Partial': 'true' } });
+            const res = await fetch(href, {headers: {'X-Partial': 'true'}});
             const html = await res.text();
             document.querySelector('#storyGrid').innerHTML = html;
 
@@ -111,7 +114,7 @@ document.querySelectorAll('.filter-tag a').forEach(a => {
 
         } catch (err) {
             console.error('加载分类内容失败:', err);
-        }finally {
+        } finally {
             currentState.isLoading = false;
             hideLoading();
         }
@@ -180,7 +183,7 @@ async function handleScroll() {
 // 加载更多故事
 async function loadMoreStories() {
     const scrollPos = window.scrollY;
-    console.log('分页前高度：',window.scrollY);
+    console.log('分页前高度：', window.scrollY);
     showLoading();
     try {
         // 计算下一页
@@ -193,36 +196,37 @@ async function loadMoreStories() {
         }
 
         // 获取下一页数据
-        const res = await fetch('/story/list/'+currentState.activeCategoryId+'/'+nextPage, {
-            headers: { 'X-pagination': 'true' }
-        });
-
-        if (!res.ok) {
-            throw new Error('网络请求失败');
-        }
-
-        const data = await res.json();
-        const storyList = data.storyList;
-        let html = '';
-        for (const story of storyList) {
-            html += `
-                <article class="content-card">
-                    <div class="card-info">
-                        <span class="card-category">${story.category_name}</span>
-                        <h3 class="card-title"><a href='/story/<%=story.id %>' target='_blank'>${story.title}</a></h3>
-                        <p class="card-excerpt">${story.excerpt}</p>
-                        <div class="card-meta">
-                            <div class="account-name">${story.category_name}</div>
-                            <div class="card-stats">
-                                <span><i class="far fa-file-alt"></i>${story.length}字</span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-            `;
-        }
-
-        elements.storyGrid.insertAdjacentHTML('beforeend', html);
+        await loadStory(currentState.activeCategoryId,nextPage)
+        // const res = await fetch('/story/list/' + currentState.activeCategoryId + '/' + nextPage, {
+        //     headers: {'X-pagination': 'true'}
+        // });
+        //
+        // if (!res.ok) {
+        //     throw new Error('网络请求失败');
+        // }
+        //
+        // const data = await res.json();
+        // const storyList = data.storyList;
+        // let html = '';
+        // for (const story of storyList) {
+        //     html += `
+        //         <article class="content-card">
+        //             <div class="card-info">
+        //                 <span class="card-category">${story.category_name}</span>
+        //                 <h3 class="card-title"><a href='/story/<%=story.id %>' target='_blank'>${story.title}</a></h3>
+        //                 <p class="card-excerpt">${story.excerpt}</p>
+        //                 <div class="card-meta">
+        //                     <div class="account-name">${story.category_name}</div>
+        //                     <div class="card-stats">
+        //                         <span><i class="far fa-file-alt"></i>${story.length}字</span>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </article>
+        //     `;
+        // }
+        //
+        // elements.storyGrid.insertAdjacentHTML('beforeend', html);
 
         // 更新状态
         currentState.currentPage = nextPage;
@@ -235,7 +239,7 @@ async function loadMoreStories() {
         hideLoading();
         //记住当前滚动位置
         setTimeout(() => {
-            window.scrollTo(0, scrollPos);
+            window.scrollTo(0, scrollPos+200);
         }, 200);
     }
 }
@@ -266,6 +270,8 @@ function initSidebar() {
     // sidebarElements.themeToggle.addEventListener('click', toggleTheme);
     // sidebarElements.refreshButton.addEventListener('click', refreshHome);
 
+    elements.settingsClose.addEventListener('click', closeCategorySettingsModal);
+
     // 响应式处理
     handleResponsiveSidebar();
     window.addEventListener('resize', handleResponsiveSidebar);
@@ -288,6 +294,7 @@ function initSidebar() {
         }
     }
 }
+
 // 切换侧边栏显示/隐藏
 function toggleSidebar() {
     // 移动设备上
@@ -337,8 +344,8 @@ function toggleFunctionDropdown() {
 }
 
 // 打开分类设置弹窗
-function openCategorySettingsModal() {
-    populateCategorySettings();
+async function openCategorySettingsModal() {
+    await populateCategorySettings();
     elements.categorySettingsModal.classList.add('active');
 
     // 禁止背景滚动
@@ -351,7 +358,10 @@ function openCategorySettingsModal() {
 // 填充分类设置内容
 async function populateCategorySettings() {
     // 创建分类设置的视图容器
-    const categoryList = await fetchCategory();
+    if (currentState.categories === null || currentState.categories.length == 0) {
+        const categoryList = await fetchCategory();
+        currentState.categories = categoryList;
+    }
 
     let selectedHTML = '';
 
@@ -424,24 +434,206 @@ async function populateCategorySettings() {
     `;
 
     elements.categorySettingsList.innerHTML = html;
-
-    // 更新警告显示
-    updateCategoryLimitWarning();
 }
 
-async function fetchCategory() {
-    const res = await fetch('/story/all/category');
-    const data = await res.json();
-    return data.categoryList;
+// 关闭分类设置弹窗
+function closeCategorySettingsModal() {
+    elements.categorySettingsModal.classList.remove('active');
+
+    // 恢复背景滚动
+    document.body.classList.remove('modal-open');
+
+    // 恢复滚动位置
+    setTimeout(() => {
+        window.scrollTo(0, window.modalScrollY || 0);
+    }, 10);
 }
 
+// 处理分类切换
+async function handleCategoryToggle(categoryId, isAdd) {
+    if (isAdd) {
+        // 检查是否已达到最大限制
+        if (currentState.selectedCategoryIds.length >= MAX_NAV_CATEGORIES) {
+            // 显示最大限制警告
+            const limitInfo = document.querySelector('.category-limit-info');
+            if (limitInfo) {
+                limitInfo.classList.add('shake-animation');
+                setTimeout(() => {
+                    limitInfo.classList.remove('shake-animation');
+                }, 820);
+            }
+            return;
+        }
 
-async function fetchCount(categoryId) {
-    const res = await fetch('/story/count/' + categoryId);
-    const data = await res.json();
-    return data.dataCount;
+        // 添加到选中列表
+        if (!currentState.selectedCategoryIds.includes(categoryId)) {
+            currentState.selectedCategoryIds.push(categoryId);
+        }
+    } else {
+        // 检查是否只剩下最后一个分类
+        if (currentState.selectedCategoryIds.length <= 1) {
+            // 显示至少需要一个分类的警告
+            showToast('至少需要选择一个分类', 'warning');
+
+            // 高亮显示当前元素提示不能移除
+            const categoryItem = document.querySelector(`.category-item[data-id="${categoryId}"]`);
+            if (categoryItem) {
+                categoryItem.classList.add('shake-animation');
+                setTimeout(() => {
+                    categoryItem.classList.remove('shake-animation');
+                }, 820);
+            }
+            return;
+        }
+        // 从选中列表移除
+        currentState.selectedCategoryIds = currentState.selectedCategoryIds.filter(id => id !== categoryId);
+    }
+
+    // 立即保存用户设置
+    saveUserCategorySettings(currentState.selectedCategoryIds);
+
+    // 重新渲染设置项
+    await populateCategorySettings();
+
+    // 重新渲染导航栏分类
+    renderCategories();
+
+    // 如果当前激活的分类不在选中列表中，切换到第一个选中的分类
+    if (!currentState.selectedCategoryIds.includes(currentState.activeCategoryId) && currentState.selectedCategoryIds.length > 0) {
+        //handleCategoryChange(currentState.selectedCategoryIds[0], true);
+        elements.storyGrid.innerHTML = '';
+        await loadStory(currentState.selectedCategoryIds[0],1);
+
+        const tags = document.querySelectorAll('.filter-tag');
+        for (const tag of tags) {
+            tag.classList.remove('active');
+            debugger
+            const a = tag.querySelector('a');
+            if (parseInt(a.dataset.id) === categoryId) {
+                document.cookie = 'activeCategoryId=' + categoryId + '; path=/;';
+                tag.classList.add('active');
+                break;
+            }
+        }
+    }
+
+    // 显示提示信息
+    showToast('分类设置已更新', 'info');
 }
 
+// 保存用户分类设置到本地存储
+function saveUserCategorySettings(selectedCategoryIds) {
+    document.cookie = 'selectedCategoryIds=' + JSON.stringify(selectedCategoryIds) + '; path=/;';
+    //localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentState.selectedCategoryIds));
+}
+
+// 渲染分类标签，只显示用户选择的分类
+function renderCategories() {
+    let html = '';
+
+    // 过滤出用户选择的分类
+    const selectedCategories = currentState.categories.filter(
+        category => currentState.selectedCategoryIds.includes(category.id)
+    );
+
+    // 添加用户选择的分类，并默认选中第一个
+    selectedCategories.forEach((category, index) => {
+        const isActive = category.id === currentState.activeCategoryId;
+        html += `
+            <li class="filter-tag ${isActive ? 'active' : ''} category-link">
+                <a class="tag-text" href="/story/list/${category.id}/1" data-id="<%= category.id %>">${category.name}</a>
+            </li>
+        `;
+    });
+
+    elements.categoryTags.innerHTML = html;
+
+    // 渐变淡入动画效果
+    let tags = document.querySelectorAll('.filter-tag');
+    tags.forEach((tag, index) => {
+        tag.style.opacity = '0';
+        tag.style.transform = 'translateY(5px)';
+        setTimeout(() => {
+            tag.style.transition = 'all 0.3s ease';
+            tag.style.opacity = '1';
+            tag.style.transform = 'translateY(0)';
+        }, 50 * index);
+    });
+
+    // 滚动到当前活动分类
+    setTimeout(() => {
+        // 为活动分类添加轻微的动画效果，提供视觉反馈
+        const activeTag = document.querySelector('.filter-tag.active');
+        if (activeTag) {
+            // 添加短暂的脉冲动画效果
+            activeTag.classList.add('pulse-effect');
+            setTimeout(() => {
+                activeTag.classList.remove('pulse-effect');
+            }, 800);
+        }
+    }, 300);
+
+    // 绑定分类点击事件
+    // document.querySelectorAll('.filter-tag').forEach(tag => {
+    //     tag.addEventListener('click', () => {
+    //         const categoryId = parseInt(tag.dataset.id);
+    //
+    //         // 检查当前是否处于文章详情页
+    //         if (elements.articleView.style.display !== 'none') {
+    //             // 如果在文章页面，先返回主页，然后切换分类
+    //             showHome(true, categoryId);
+    //         } else {
+    //             // 在主页直接切换分类
+    //             handleCategoryChange(categoryId);
+    //         }
+    //
+    //         // 在移动设备上，点击分类后自动收起侧边栏
+    //         if (window.innerWidth <= 768) {
+    //             document.body.classList.remove('sidebar-mobile-open');
+    //         }
+    //     });
+    // });
+}
+
+// 显示轻提示 (Toast)
+function showToast(message, type = 'success') {
+    // 检查是否已存在toast元素，如果存在则移除
+    const existingToast = document.querySelector('.toast-message');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // 创建新的toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast-message ${type}`;
+
+    // 设置图标
+    let icon = 'check-circle';
+    if (type === 'error') icon = 'times-circle';
+    if (type === 'info') icon = 'info-circle';
+    if (type === 'warning') icon = 'exclamation-circle';
+
+    toast.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span>${message}</span>
+    `;
+
+    // 添加到页面
+    document.body.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // 自动消失
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
 
 function showLoading() {
     elements.loadingOverlay.classList.add('active');
@@ -462,28 +654,42 @@ function hideLoading() {
     }, 200);
 }
 
-function getCookie(cookieName){
-    const cookie = document.cookie;
-    if(!cookie){
-        return '';
-    }
-    const cookieList = cookie.split(";");
-    for (let i = 0;i<cookieList.length;i++){
-        const cookieValList = cookieList[i].split("=");
+async function loadStory(categoryId,pageNo){
+    // 获取下一页数据
+    const res = await fetch('/story/list/' + categoryId + '/' + pageNo, {
+        headers: {'X-pagination': 'true'}
+    });
 
-        if(cookieValList[0].trim() === cookieName){
-            return cookieValList[1];
-        }
+    if (!res.ok) {
+        throw new Error('网络请求失败');
     }
+
+    const data = await res.json();
+    const storyList = data.storyList;
+    let html = '';
+    for (const story of storyList) {
+        html += `
+                <article class="content-card">
+                    <div class="card-info">
+                        <span class="card-category">${story.category_name}</span>
+                        <h3 class="card-title"><a href='/story/<%=story.id %>' target='_blank'>${story.title}</a></h3>
+                        <p class="card-excerpt">${story.excerpt}</p>
+                        <div class="card-meta">
+                            <div class="account-name">${story.category_name}</div>
+                            <div class="card-stats">
+                                <span><i class="far fa-file-alt"></i>${story.length}字</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+    }
+    elements.storyGrid.insertAdjacentHTML('beforeend', html);
 }
 
-//随机数0-10
-function getRandomInt() {
-    return Math.floor(Math.random() * 7);
-}
 
 //显示故事卡片加载动画
-function showStoryCardAnimation(){
+function showStoryCardAnimation() {
     // 为新添加的卡片添加淡入动画
     const cards = elements.storyGrid.querySelectorAll('.content-card');
     for (let i = 0; i < cards.length; i++) {
@@ -500,6 +706,38 @@ function showStoryCardAnimation(){
     window.scrollTo(0, 0);
 }
 
+async function fetchCategory() {
+    const res = await fetch('/story/all/category');
+    const data = await res.json();
+    return data.categoryList;
+}
+
+
+async function fetchCount(categoryId) {
+    const res = await fetch('/story/count/' + categoryId);
+    const data = await res.json();
+    return data.dataCount;
+}
+
+function getCookie(cookieName) {
+    const cookie = document.cookie;
+    if (!cookie) {
+        return '';
+    }
+    const cookieList = cookie.split(";");
+    for (let i = 0; i < cookieList.length; i++) {
+        const cookieValList = cookieList[i].split("=");
+
+        if (cookieValList[0].trim() === cookieName) {
+            return cookieValList[1];
+        }
+    }
+}
+
+//随机数0-10
+function getRandomInt() {
+    return Math.floor(Math.random() * 7);
+}
 
 // 支持浏览器回退
 // window.addEventListener('popstate', async () => {
