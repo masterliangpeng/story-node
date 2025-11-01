@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let activeCategoryId = getCookie('activeCategoryId');
     let selectedCategoryIds = getCookie('selectedCategoryIds');
-    if (typeof activeCategoryId === 'undefined' || activeCategoryId === null || activeCategoryId === '') {
+    if (isNullOrUndefined(activeCategoryId) || isNullOrUndefined(selectedCategoryIds)) {
         const res = await fetch('/story/initCategoryId');
         const result = await res.json();
         activeCategoryId = JSON.stringify(result.defaultCategoryId);
@@ -61,8 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentState.selectedCategoryIds = JSON.parse(selectedCategoryIds);
 
     const count = await fetchCount(activeCategoryId);
-    let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
-    currentState.totalPages = totalPages;
+    currentState.totalPages = Math.ceil(count / PAGE_MAX_SIZE);
     currentState.currentPage = 1;
 
     //判断是否可以加载数据
@@ -74,63 +73,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     showStoryCardAnimation();
 });
 
-//分类点击事件
-document.querySelectorAll('.filter-tag a').forEach(a => {
-    a.addEventListener('click', async e => {
-        e.preventDefault();     // 阻止默认跳转
-        e.stopPropagation();    // 防止冒泡到 li，避免重复触发
-
-        const href = a.getAttribute('href');
-        if (!href) return;
-        currentState.isLoading = true;
-        showLoading();
-        const activeCategoryId = a.getAttribute('data-id');
-        currentState.activeCategoryId = activeCategoryId;
-        document.cookie = 'activeCategoryId=' + activeCategoryId + '; path=/;';
-        // 异步加载分类内容
-        try {
-            //设置总页数
-            const count = await fetchCount(activeCategoryId);
-            let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
-            console.log('totalPages=', totalPages);
-            currentState.totalPages = totalPages;
-            currentState.currentPage = 1;
-            // 重置分页状态
-            currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
-
-            const res = await fetch(href, {headers: {'X-Partial': 'true'}});
-            const html = await res.text();
-            document.querySelector('#storyGrid').innerHTML = html;
-
-            // 更新浏览器地址（不会刷新页面）
-            history.pushState(null, '', href);
-
-            // 高亮当前分类（可选）
-            document.querySelectorAll('.filter-tag').forEach(li => li.classList.remove('active'));
-            a.closest('.filter-tag').classList.add('active');
-
-            //添加动画
-            showStoryCardAnimation();
-
-        } catch (err) {
-            console.error('加载分类内容失败:', err);
-        } finally {
-            currentState.isLoading = false;
-            hideLoading();
-        }
+//绑定分类点击事件
+function bindCategoryClick(){
+    // 让点击整个 li 区域都触发内部 a 的点击
+    document.querySelectorAll('.filter-tag').forEach(li => {
+        li.addEventListener('click', e => {
+            // 如果点击的不是 <a> 元素，手动触发 a 点击
+            if (!e.target.closest('a')) {
+                const a = li.querySelector('a');
+                if (a) a.click();
+            }
+        });
     });
-});
 
-//  让点击整个 li 区域都触发内部 a 的点击
-document.querySelectorAll('.filter-tag').forEach(li => {
-    li.addEventListener('click', e => {
-        // 如果点击的不是 <a> 元素，手动触发 a 点击
-        if (!e.target.closest('a')) {
-            const a = li.querySelector('a');
-            if (a) a.click();
-        }
+
+    //分类点击事件
+    document.querySelectorAll('.filter-tag a').forEach(a => {
+        a.addEventListener('click', async e => {
+            e.preventDefault();     // 阻止默认跳转
+            e.stopPropagation();    // 防止冒泡到 li，避免重复触发
+
+            const href = a.getAttribute('href');
+            if (!href) return;
+            currentState.isLoading = true;
+            showLoading();
+            const activeCategoryId = a.getAttribute('data-id');
+            currentState.activeCategoryId = activeCategoryId;
+            document.cookie = 'activeCategoryId=' + activeCategoryId + '; path=/;';
+
+            // if (isNullOrUndefined(getCookie('selectedCategoryIds'))) {
+            //     const res = await fetch('/story/initCategoryId');
+            //     const result = await res.json();
+            //     document.cookie = 'selectedCategoryIds=' + result.defaultCategoryIds + '; path=/;';
+            //     currentState.selectedCategoryIds = JSON.stringify(result.defaultCategoryIds);
+            // }
+
+            // 异步加载分类内容
+            try {
+                //设置总页数
+                const count = await fetchCount(activeCategoryId);
+                let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
+                currentState.totalPages = totalPages;
+                currentState.currentPage = 1;
+                // 重置分页状态
+                currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
+
+                const res = await fetch(href, {headers: {'X-Partial': 'true'}});
+                const html = await res.text();
+                document.querySelector('#storyGrid').innerHTML = html;
+
+                // 更新浏览器地址（不会刷新页面）
+                history.pushState(null, '', href);
+
+                // 高亮当前分类（可选）
+                document.querySelectorAll('.filter-tag').forEach(li => li.classList.remove('active'));
+                a.closest('.filter-tag').classList.add('active');
+
+                //添加动画
+                showStoryCardAnimation();
+
+            } catch (err) {
+                console.error('加载分类内容失败:', err);
+            } finally {
+                currentState.isLoading = false;
+                hideLoading();
+            }
+        });
     });
-});
+}
 
 
 //欢迎页
@@ -246,6 +256,8 @@ async function loadMoreStories() {
 
 // 初始化侧边栏
 function initSidebar() {
+    //绑定分类点击事件
+    bindCategoryClick()
     // 侧边栏收起按钮
     sidebarElements.sidebarClose.addEventListener('click', toggleSidebar);
 
@@ -358,9 +370,8 @@ async function openCategorySettingsModal() {
 // 填充分类设置内容
 async function populateCategorySettings() {
     // 创建分类设置的视图容器
-    if (currentState.categories === null || currentState.categories.length == 0) {
-        const categoryList = await fetchCategory();
-        currentState.categories = categoryList;
+    if (currentState.categories === null || currentState.categories.length === 0) {
+        currentState.categories = await fetchCategory();
     }
 
     let selectedHTML = '';
@@ -507,11 +518,12 @@ async function handleCategoryToggle(categoryId, isAdd) {
         const tags = document.querySelectorAll('.filter-tag');
         for (const tag of tags) {
             tag.classList.remove('active');
-            debugger
             const a = tag.querySelector('a');
-            if (parseInt(a.dataset.id) === categoryId) {
+            if (parseInt(a.getAttribute('data-id')) === currentState.selectedCategoryIds[0]) {
                 document.cookie = 'activeCategoryId=' + categoryId + '; path=/;';
                 tag.classList.add('active');
+                currentState.activeCategoryId = currentState.selectedCategoryIds[0];
+                document.cookie = 'activeCategoryId=' + currentState.activeCategoryId + '; path=/;';
                 break;
             }
         }
@@ -530,7 +542,6 @@ function saveUserCategorySettings(selectedCategoryIds) {
 // 渲染分类标签，只显示用户选择的分类
 function renderCategories() {
     let html = '';
-
     // 过滤出用户选择的分类
     const selectedCategories = currentState.categories.filter(
         category => currentState.selectedCategoryIds.includes(category.id)
@@ -541,7 +552,7 @@ function renderCategories() {
         const isActive = category.id === currentState.activeCategoryId;
         html += `
             <li class="filter-tag ${isActive ? 'active' : ''} category-link">
-                <a class="tag-text" href="/story/list/${category.id}/1" data-id="<%= category.id %>">${category.name}</a>
+                <a class="tag-text" href="/story/list/${category.id}/1" data-id="${category.id}">${category.name}</a>
             </li>
         `;
     });
@@ -573,26 +584,8 @@ function renderCategories() {
         }
     }, 300);
 
-    // 绑定分类点击事件
-    // document.querySelectorAll('.filter-tag').forEach(tag => {
-    //     tag.addEventListener('click', () => {
-    //         const categoryId = parseInt(tag.dataset.id);
-    //
-    //         // 检查当前是否处于文章详情页
-    //         if (elements.articleView.style.display !== 'none') {
-    //             // 如果在文章页面，先返回主页，然后切换分类
-    //             showHome(true, categoryId);
-    //         } else {
-    //             // 在主页直接切换分类
-    //             handleCategoryChange(categoryId);
-    //         }
-    //
-    //         // 在移动设备上，点击分类后自动收起侧边栏
-    //         if (window.innerWidth <= 768) {
-    //             document.body.classList.remove('sidebar-mobile-open');
-    //         }
-    //     });
-    // });
+    // 重新绑定分类点击事件.
+    bindCategoryClick();
 }
 
 // 显示轻提示 (Toast)
@@ -737,6 +730,10 @@ function getCookie(cookieName) {
 //随机数0-10
 function getRandomInt() {
     return Math.floor(Math.random() * 7);
+}
+
+function isNullOrUndefined(value) {
+    return typeof value === 'undefined' || value === null || value === '';
 }
 
 // 支持浏览器回退
