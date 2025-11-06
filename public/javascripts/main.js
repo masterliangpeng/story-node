@@ -5,10 +5,8 @@ let currentState = {
     activeCategoryId: null, // 初始为null，加载后设为第一个分类的ID
     currentPage: 1,//当前页数
     totalPages: 0,//总页数
-    stories: [],
     categories: [],
     selectedCategoryIds: [], // 用户选择的分类ID列表
-    searchKeyword: '',
     isLoading: true,   // 是否正在加载数据
     hasMoreData: false,   // 是否还有更多数据
     isSimpleMode: false,  // 是否为简约模式
@@ -37,10 +35,11 @@ const sidebarElements = {
     sidebarClose: document.getElementById('sidebarClose'),
     multiFunctionButton: document.getElementById('multiFunctionButton'),
     categorySettingsButton: document.getElementById('categorySettingsButton'),
+    themeToggle: document.getElementById('themeToggle'),
+    refreshButton: document.getElementById('refreshButton'),
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('刷新进这里了');
     //欢迎动画
     showWelcomeAnimation();
 
@@ -279,10 +278,12 @@ function initSidebar() {
     // 从功能下拉菜单中移动原有功能按钮的事件监听
     // sidebarElements.viewModeToggle.addEventListener('click', toggleViewMode);
     sidebarElements.categorySettingsButton.addEventListener('click', openCategorySettingsModal);
-    // sidebarElements.themeToggle.addEventListener('click', toggleTheme);
-    // sidebarElements.refreshButton.addEventListener('click', refreshHome);
+    sidebarElements.themeToggle.addEventListener('click', toggleTheme);
+    sidebarElements.refreshButton.addEventListener('click', refreshHome);
 
     elements.settingsClose.addEventListener('click', closeCategorySettingsModal);
+    //检查并应用存储的主题
+    checkSavedTheme();
 
     // 响应式处理
     handleResponsiveSidebar();
@@ -588,6 +589,53 @@ function renderCategories() {
     bindCategoryClick();
 }
 
+//重置刷新
+async function refreshHome(){
+    localStorage.removeItem('theme')
+    currentState.activeCategoryId = null;
+    currentState.currentPage = 1;
+    currentState.totalPages = 0;
+    currentState.categories = [];
+    currentState.selectedCategoryIds = [];
+    currentState.isLoading = true;
+    currentState.hasMoreData = false;
+    currentState.isSimpleMode = true;
+    const res = await fetch('/story/initCategoryId');
+    const result = await res.json();
+    document.cookie = 'activeCategoryId=' + JSON.stringify(result.defaultCategoryId) + '; path=/;';
+    document.cookie = 'selectedCategoryIds=' + JSON.stringify(result.defaultCategoryIds) + '; path=/;';
+
+    showToast('已恢复默认设置', 'info');
+
+    window.location.href = "/";
+}
+
+// 主题切换功能
+function toggleTheme() {
+    const body = document.body;
+    const isDarkMode = body.classList.contains('dark-theme');
+
+    if (isDarkMode) {
+        body.classList.remove('dark-theme');
+        elements.themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>切换主题</span>';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.classList.add('dark-theme');
+
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// 检查保存的主题
+function checkSavedTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
+    }
+}
+
 // 显示轻提示 (Toast)
 function showToast(message, type = 'success') {
     // 检查是否已存在toast元素，如果存在则移除
@@ -665,7 +713,7 @@ async function loadStory(categoryId,pageNo){
                 <article class="content-card">
                     <div class="card-info">
                         <span class="card-category">${story.category_name}</span>
-                        <h3 class="card-title"><a href='/story/<%=story.id %>' target='_blank'>${story.title}</a></h3>
+                        <h3 class="card-title"><a href='/story/${story.id}' target='_blank'>${story.title}</a></h3>
                         <p class="card-excerpt">${story.excerpt}</p>
                         <div class="card-meta">
                             <div class="account-name">${story.category_name}</div>

@@ -1,22 +1,37 @@
-<% storyList.forEach(function(story){ %>
-<article class="content-card">
-     <div class="card-info">
-         <span class="card-category"><%=story.category_name %></span>
-         <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
-         <p class="card-excerpt"><%=story.excerpt %></p>
-         <div class="card-meta">
-             <div class="account-name"><%=story.category_name %></div>
-             <div class="card-stats">
-                 <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+<% if(storyList && storyList.length > 0) { %>
+    <% storyList.forEach(function(story){ %>
+    <article class="content-card">
+         <div class="card-info">
+             <span class="card-category"><%=story.category_name %></span>
+             <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
+             <p class="card-excerpt"><%=story.excerpt %></p>
+             <div class="card-meta">
+                 <div class="account-name"><%=story.category_name %></div>
+                 <div class="card-stats">
+                     <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+                 </div>
              </div>
          </div>
-     </div>
- </article>
- <% }); %>
+     </article>
+     <% }); %>
 
-<noscript>
-  <% for(let i = 2; i <= totalPages; i++) { %>
-      <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
-  <% } %>
-</noscript>
+    <noscript>
+      <% for(let i = 2; i <= totalPages; i++) { %>
+          <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
+      <% } %>
+    </noscript>
 
+<% } else { %>
+    <div class="no-result">
+        <div class="no-result-icon">
+            <i class="fas fa-cat"></i>
+        </div>
+        <div class="no-result-animal">
+            <i class="fas fa-paw"></i>
+        </div>
+        <div class="no-result-title">抱歉，没有找到符合条件的故事</div>
+        <div class="no-result-text">
+            小猫咪很抱歉没有找到您想要的内容。请尝试使用不同的关键词或选择其他分类。
+        </div>
+    </div>
+<% } %>

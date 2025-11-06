@@ -1,10 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <head>
     <title>小故事铺是一个专注于原创短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title>
     <link rel="icon" type="image/png" href="/images/story.png">
     <link rel='stylesheet' href='/stylesheets/styles.css' />
     <link rel='stylesheet' href='/stylesheets/all.min.css' />
+        <script>
+            // 检测移动端设备并跳转
+            function detectMobileAndRedirect() {
+                // 检测屏幕宽度
+                const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+                // 检测用户代理字符串
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+
+                // 如果屏幕宽度小于768px或检测到移动设备，则跳转到app.html
+                if (screenWidth <= 768 || isMobileDevice) {
+                    // 避免无限重定向，检查当前页面是否已经是app.html
+                    if (!window.location.pathname.includes('/app')) {
+                        window.location.href = '/app';
+                    }
+                }
+            }
+
+            // 页面加载时检测
+            detectMobileAndRedirect();
+
+            // 监听窗口大小变化
+            window.addEventListener('resize', detectMobileAndRedirect);
+        </script>
   </head>
 
   <body class="simple-mode">
@@ -67,7 +92,7 @@
 
                     <div class="action-button" id="searchButton">
                         <i class="fas fa-search"></i>
-                        <span><a href='/story/search/page/name'>故事搜索</a></span>
+                        <span><a href='/story/search/page'>故事搜索</a></span>
                     </div>
                 </div>
 
@@ -92,29 +117,44 @@
     <main class="main-container" id="mainContainer">
         <div class='container'>
             <div class="content-grid" id="storyGrid">
-                <!-- 故事卡片将通过动态加载 -->
-                <% storyList.forEach(function(story){ %>
-                <article class="content-card">
-                     <div class="card-info">
-                         <span class="card-category"><%=story.category_name %></span>
-                         <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
-                         <p class="card-excerpt"><%=story.excerpt %></p>
-                         <div class="card-meta">
-                             <div class="account-name"><%=story.category_name %></div>
-                             <div class="card-stats">
-                                 <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+                <% if(storyList && storyList.length > 0) { %>
+                    <!-- 故事卡片将通过动态加载 -->
+                    <% storyList.forEach(function(story){ %>
+                    <article class="content-card">
+                         <div class="card-info">
+                             <span class="card-category"><%=story.category_name %></span>
+                             <h3 class="card-title"><a href='/story/<%=story.id %>' target=‘_blank’><%=story.title %></a></h3>
+                             <p class="card-excerpt"><%=story.excerpt %></p>
+                             <div class="card-meta">
+                                 <div class="account-name"><%=story.category_name %></div>
+                                 <div class="card-stats">
+                                     <span><i class="far fa-file-alt"></i> <%=story.length %>字</span>
+                                 </div>
                              </div>
                          </div>
-                     </div>
-                 </article>
-                 <% }); %>
+                     </article>
+                     <% }); %>
 
-                 <!-- 分页 -->
-                 <noscript>
-                     <% for(let i = 2; i <= totalPages; i++) { %>
-                         <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
-                     <% } %>
-                 </noscript>
+                     <!-- 分页 -->
+                     <noscript>
+                         <% for(let i = 2; i <= totalPages; i++) { %>
+                             <a href="/story/list/<%=activeCategoryId%>/<%= i %>">第 <%= i %> 页</a>
+                         <% } %>
+                     </noscript>
+                <% } else { %>
+                    <div class="no-result">
+                        <div class="no-result-icon">
+                            <i class="fas fa-cat"></i>
+                        </div>
+                        <div class="no-result-animal">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <div class="no-result-title">抱歉，没有找到符合条件的故事</div>
+                        <div class="no-result-text">
+                            小猫咪很抱歉没有找到您想要的内容。请尝试使用不同的关键词或选择其他分类。
+                        </div>
+                    </div>
+                <% } %>
             </div>
         </div>
     </main>

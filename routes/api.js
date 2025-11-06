@@ -177,8 +177,7 @@ router.get('/story/:id', async (req, res) => {
     });
 });
 
-router.get('/story/search/page/name',(req,res)=>{
-    console.log('进了了/story/search')
+router.get('/story/search/page',(req,res)=>{
     res.render('search');
 })
 
@@ -234,15 +233,6 @@ async function fetchCount(categoryId) {
     }
     return dataCount;
 }
-
-// function initCategoryId(activeCategoryId, categoryList) {
-//     if (defaultCategoryId === null) {
-//         defaultCategoryId = activeCategoryId;
-//     }
-//     if (defaultCategoryIds.length === 0) {
-//         defaultCategoryIds = [categoryList[0].id, categoryList[1].id, categoryList[2].id, categoryList[3].id, categoryList[4].id, categoryList[5].id, categoryList[6].id, categoryList[7].id, categoryList[8].id, categoryList[9].id];
-//     }
-// }
 
 async function fetchStoryMain(page, activeCategoryId) {
     const options = {
