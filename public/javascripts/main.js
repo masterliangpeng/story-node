@@ -191,6 +191,8 @@ async function handleScroll() {
 
 // 加载更多故事
 async function loadMoreStories() {
+    const scrollPos = window.scrollY;
+    console.log('分页前高度：', window.scrollY);
     showLoading();
     try {
         // 计算下一页
@@ -204,6 +206,36 @@ async function loadMoreStories() {
 
         // 获取下一页数据
         await loadStory(currentState.activeCategoryId,nextPage)
+        // const res = await fetch('/story/list/' + currentState.activeCategoryId + '/' + nextPage, {
+        //     headers: {'X-pagination': 'true'}
+        // });
+        //
+        // if (!res.ok) {
+        //     throw new Error('网络请求失败');
+        // }
+        //
+        // const data = await res.json();
+        // const storyList = data.storyList;
+        // let html = '';
+        // for (const story of storyList) {
+        //     html += `
+        //         <article class="content-card">
+        //             <div class="card-info">
+        //                 <span class="card-category">${story.category_name}</span>
+        //                 <h3 class="card-title"><a href='/story/<%=story.id %>' target='_blank'>${story.title}</a></h3>
+        //                 <p class="card-excerpt">${story.excerpt}</p>
+        //                 <div class="card-meta">
+        //                     <div class="account-name">${story.category_name}</div>
+        //                     <div class="card-stats">
+        //                         <span><i class="far fa-file-alt"></i>${story.length}字</span>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </article>
+        //     `;
+        // }
+        //
+        // elements.storyGrid.insertAdjacentHTML('beforeend', html);
 
         // 更新状态
         currentState.currentPage = nextPage;
@@ -215,9 +247,9 @@ async function loadMoreStories() {
         currentState.isLoading = false;
         hideLoading();
         //记住当前滚动位置
-        // setTimeout(() => {
-        //     window.scrollTo(0, scrollPos+200);
-        // }, 200);
+        setTimeout(() => {
+            window.scrollTo(0, scrollPos+200);
+        }, 200);
     }
 }
 
@@ -582,14 +614,15 @@ async function refreshHome(){
 function toggleTheme() {
     const body = document.body;
     const isDarkMode = body.classList.contains('dark-theme');
+
     if (isDarkMode) {
         body.classList.remove('dark-theme');
-        sidebarElements.themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>切换主题</span>';
+        elements.themeToggle.innerHTML = '<i class="fas fa-moon"></i><span>切换主题</span>';
         localStorage.setItem('theme', 'light');
     } else {
         body.classList.add('dark-theme');
 
-        sidebarElements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
         localStorage.setItem('theme', 'dark');
     }
 }
@@ -599,7 +632,7 @@ function checkSavedTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        sidebarElements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i><span>切换主题</span>';
     }
 }
 

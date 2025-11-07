@@ -8,18 +8,6 @@
     <link rel="stylesheet" href="/stylesheets/all.min.css">
     <link rel="stylesheet" href="/live2d/css/live2d.css"/>
     <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-    <style>
-        .search-results { max-height: calc(100vh - 84px);overflow-y: auto; }
-        .results-list { list-style: none; margin: 0; padding: 0; }
-        .result-item { padding: 10px 12px; border-bottom: 1px solid #e5e5e5; }
-        .result-item:last-child { border-bottom: none; }
-        .result-title { font-weight: 600; color: #333; text-decoration: none; }
-        body.dark-theme .result-title { color: #ddd; }
-        .result-meta { font-size: 12px; color: #888; margin-top: 4px; }
-        body.dark-theme .result-meta { color: #aaa; }
-        .result-excerpt { font-size: 13px; color: #555; margin-top: 6px; line-height: 1.5; }
-        body.dark-theme .result-excerpt { color: #cfcfcf; }
-    </style>
 </head>
     <body>
         <main class="main-container" id="mainContainer">
@@ -31,10 +19,6 @@
                     <div class="search-bar">
                         <i class="fas fa-search search-icon"></i>
                         <input type="text" id="searchInput" placeholder="支持搜索当前分类下的所有故事，按回车键搜索...">
-                    </div>
-                    <!-- 搜索结果列表区域 -->
-                    <div class="search-results" id="searchResults">
-                        <ul class="results-list" id="resultsList"></ul>
                     </div>
                 </div>
 
@@ -56,71 +40,9 @@
                 searchKeyword: '',
             }
 
-            // 假数据：模拟搜索到的故事
-            const mockStories = [
-                { id: 101, title: '深夜的雨', category_name: '恐怖', excerpt: '窗外的雨声忽远忽近，仿佛有人在低语……' },
-                { id: 102, title: '奶奶的糖罐', category_name: '亲情', excerpt: '每次翻开糖罐，都是童年的味道与爱。' },
-                { id: 103, title: '小熊找星星', category_name: '儿童', excerpt: '小熊和月亮约定，一起数天上的星星。' },
-                { id: 104, title: '旅途中的灯塔', category_name: '励志', excerpt: '远方的灯塔提醒着我，不要忘记方向。' },
-                { id: 105, title: '枫叶小镇', category_name: '睡前', excerpt: '夜风轻拂枫叶，故事在微光中慢慢展开。' },
-                { id: 106, title: '旧书店的秘密', category_name: '奇幻', excerpt: '翻开一本旧书，竟能听见过去的声音。' },
-                { id: 107, title: '回信', category_name: '爱情', excerpt: '他在信尾写下：愿你安好，愿我如愿。' },
-                { id: 108, title: '白墙上的影子', category_name: '悬疑', excerpt: '影子每天都在变，只有我知道它在说什么。' },
-                { id: 109, title: '河边的蒲公英', category_name: '治愈', excerpt: '轻轻一吹，愿望与种子一起飞远。' },
-                { id: 110, title: '面包与星光', category_name: '温馨', excerpt: '一家人围坐，有面包有故事也有星光。' }
-            ];
-
-            function escapeHtml(str) {
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            }
-
-            function renderResults(list) {
-                const ul = document.getElementById('resultsList');
-                if (!ul) return;
-                if (!list || list.length === 0) {
-                    ul.innerHTML = '<li class="result-item">没有找到相关故事，试试其他关键词～</li>';
-                    return;
-                }
-                ul.innerHTML = list.map(s => `
-                    <li class="result-item">
-                        <a class="result-title" href="/story/${s.id}" target="_blank">${escapeHtml(s.title)}</a>
-                        <div class="result-meta">分类：${escapeHtml(s.category_name)}</div>
-                        <div class="result-excerpt">${escapeHtml(s.excerpt)}</div>
-                    </li>
-                `).join('');
-            }
-
-            function performSearch() {
-                const input = document.getElementById('searchInput');
-                const kw = (input?.value || '').trim().toLowerCase();
-                const filtered = kw
-                    ? mockStories.filter(s => (s.title + s.excerpt + s.category_name).toLowerCase().includes(kw))
-                    : mockStories;
-                renderResults(filtered);
-            }
-
             document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('searchClose').addEventListener('click', closeSearchBox);
                 toggleSearchBox();
-                checkSavedTheme();
-
-                // 初次加载显示假数据列表
-                renderResults(mockStories);
-
-                // 回车触发搜索
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            performSearch();
-                        }
-                    });
-                }
             });
 
             function toggleSearchBox() {
@@ -156,13 +78,6 @@
 //                 const html = await res.text();
 //                 document.querySelector('#storyGrid').innerHTML = html;
 //             });
-
-            function checkSavedTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-theme');
-                }
-            }
         </script>
     </body>
  </html>
