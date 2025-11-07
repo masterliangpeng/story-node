@@ -43,18 +43,15 @@
                     </div>
                 </div>
 
-                <div class="article-content" id="storyContent"><% contentList.forEach(function(content){ %><p style="opacity: 1; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p><% }); %></div>
+                <div class="article-content" id="storyContent"><% contentList.forEach(function(content){ %><p style="opacity: 0; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p><% }); %></div>
             </div>
         </div>
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', ()=>{
-            const pElementList = document.getElementById('storyContent').querySelectorAll('p');
-            pElementList.forEach((p)=>{
-                p.style.opacity = '0';
-                p.style.transform = 'translateY(10px)';
-            })
+            checkSavedTheme();
 
+            const pElementList = document.getElementById('storyContent').querySelectorAll('p');
             pElementList.forEach((p, index) => {
                 setTimeout(() => {
                     // 短暂延迟后显示段落
@@ -65,8 +62,14 @@
                     }, 50);
                 }, 100 * Math.min(index, 5)); // 最多延迟5段，防止过长的故事有太长的加载时间
             });
-
         })
+
+        function checkSavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+        }
     </script>
 </body>
 </html>
