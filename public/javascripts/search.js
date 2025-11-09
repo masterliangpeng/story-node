@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchInput) {
         searchInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
-                debugger
                 const keyword = (searchInput?.value || '').trim().toLowerCase();
                 const res = await fetch('/story/search/page?keyword=' + keyword,{
                     headers: {'x-search': 'true'}
