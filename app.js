@@ -41,7 +41,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// const PORT = process.env.PORT || 4001;
 app.listen(4000, () => {
+  // console.log(`服务器运行在 http://localhost:${PORT}`);
   console.log('服务器运行在 http://localhost:4000');
 });
 

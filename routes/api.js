@@ -148,10 +148,10 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
             if (!isNullOrUndefined(selectedCategoryIds)) {
                 options.filterIn = {'id': JSON.parse(selectedCategoryIds)};
             }
-            console.log('selectedCategoryIds:',selectedCategoryIds)
+            console.log('selectedCategoryIds:', selectedCategoryIds)
             let {data, error} = await supabase.fetchData('story_category', options);
             categoryList = data;
-            console.log('categoryList:',categoryList)
+            console.log('categoryList:', categoryList)
             //initCategoryId(activeCategoryId, categoryList);
 
             if (isNullOrUndefined(selectedCategoryIds)) {
@@ -187,13 +187,15 @@ router.get('/story/initCategoryId', async (req, res) => {
     }
     let {data, error} = await supabase.fetchData('story_category', options);
 
-    res.json({defaultCategoryId:data[0].id, defaultCategoryIds: [data[0].id, data[1].id, data[2].id, data[3].id, data[4].id, data[5].id, data[6].id, data[7].id, data[8].id, data[9].id]});
+    res.json({
+        defaultCategoryId: data[0].id,
+        defaultCategoryIds: [data[0].id, data[1].id, data[2].id, data[3].id, data[4].id, data[5].id, data[6].id, data[7].id, data[8].id, data[9].id]
+    });
 })
 
 
 //获取当个故事
 router.get('/story/:id', async (req, res) => {
-    console.log('进了了/story/:id');
     let storyMain;
     let id = JSON.parse(req.params.id);
     try {
@@ -223,8 +225,28 @@ router.get('/story/:id', async (req, res) => {
     });
 });
 
-router.get('/story/search/page',(req,res)=>{
-    res.render('search');
+router.get('/story/search/page', async (req, res) => {
+    let keyword = req.query.keyword;
+    console.log('keyword:',keyword);
+    console.log('req.headers[\'x-search\']:',req.headers['x-search']);
+    if (req.headers['x-search'] && !isNullOrUndefined(keyword)) {
+        const options = {
+            filterLike: {title: keyword}
+        }
+        let {data, error} = await supabase.fetchData('story_main',options)
+        res.json( {
+            storyList: data,
+            title: '搜素故事'
+        });
+    } else {
+        const options = {limit: 20}
+        let {data, error} = await supabase.randomFetchData('story_main', options);
+
+        res.render('search', {
+            storyList: data,
+            title: '推荐故事'
+        });
+    }
 })
 
 //获取故事总量

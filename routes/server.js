@@ -77,6 +77,22 @@ exports.fetchData = async (tableName, options = {})=>{
     }
 };
 
+exports.randomFetchData = async (tableName, options = {})=>{
+    try {
+        //构建查询
+        let query = supabase.rpc('get_random_rows', { limit_count: options.limit });
+        // 执行查询
+        const { data, error } = await query;
+        if (error) {
+            throw error;
+        }
+        return { data: data, error: error };
+    } catch (error) {
+        console.error('Supabase查询错误:', error);
+        return { data: null, error };
+    }
+};
+
 
 // 插入数据
 exports.insertData = async (tableName, data) =>{

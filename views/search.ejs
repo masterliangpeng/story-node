@@ -2,39 +2,76 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>小故事铺是一个专注于原创短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小故事铺 - 搜索精彩故事，发现温暖与惊喜</title>
     <link rel="icon" type="image/png" href="/images/story.png">
-    <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="stylesheet" href="/stylesheets/search.css">
     <link rel="stylesheet" href="/stylesheets/all.min.css">
     <link rel="stylesheet" href="/live2d/css/live2d.css"/>
     <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
-    <style>
-        .search-results { max-height: calc(100vh - 84px);overflow-y: auto; }
-        .results-list { list-style: none; margin: 0; padding: 0; }
-        .result-item { padding: 10px 12px; border-bottom: 1px solid #e5e5e5; }
-        .result-item:last-child { border-bottom: none; }
-        .result-title { font-weight: 600; color: #333; text-decoration: none; }
-        body.dark-theme .result-title { color: #ddd; }
-        .result-meta { font-size: 12px; color: #888; margin-top: 4px; }
-        body.dark-theme .result-meta { color: #aaa; }
-        .result-excerpt { font-size: 13px; color: #555; margin-top: 6px; line-height: 1.5; }
-        body.dark-theme .result-excerpt { color: #cfcfcf; }
-    </style>
 </head>
     <body>
-        <main class="main-container" id="mainContainer">
+        <header class="home-header">
+            <div class="brand">
+                <img src="/images/story.png" alt="小故事铺" class="brand-logo">
+                <span class="brand-name">小故事铺</span>
+            </div>
+            <button class="search-close" id="searchClose" aria-label="关闭">
+                <i class="fas fa-times"></i>
+            </button>
+        </header>
+        <main>
             <div class="floating-search" id="floatingSearch">
-                <button class="search-close" id="searchClose">
-                    <i class="fas fa-times"></i>
-                </button>
+
                 <div class="floating-search-container">
-                    <div class="search-bar">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="searchInput" placeholder="支持搜索当前分类下的所有故事，按回车键搜索...">
+                    <div class="hero">
+                        <h1 class="hero-title">搜一则故事，遇见一份心情</h1>
+                        <p class="hero-subtitle">支持搜索标题、摘要与分类，回车即刻呈现</p>
+                        <div class="search-bar">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" placeholder="试试：睡前、恐怖、亲情、儿童、励志…">
+                        </div>
+                        <div class="quick-tags" id="quickTags">
+                            <button class="tag" data-tag="睡前">睡前</button>
+                            <button class="tag" data-tag="恐怖">恐怖</button>
+                            <button class="tag" data-tag="童话">童话</button>
+                            <button class="tag" data-tag="儿童">儿童</button>
+                            <button class="tag" data-tag="益智">益智</button>
+                            <button class="tag" data-tag="历史">历史</button>
+                            <button class="tag" data-tag="预言">预言</button>
+                            <button class="tag" data-tag="成语">成语</button>
+                            <button class="tag" data-tag="格林">格林</button>
+                            <button class="tag" data-tag="作文">作文</button>
+                        </div>
+                        <!-- 插画区域：展示开源免费插画（unDraw，MIT License） -->
+                        <div class="search-illustrations" aria-label="主题插画">
+                            <figure class="illustration-item">
+                                <img src="/images/chahua5.png" alt="阅读爱好者插画（来自 unDraw）"loading="lazy" decoding="async"/>
+                            </figure>
+                        </div>
                     </div>
-                    <!-- 搜索结果列表区域 -->
-                    <div class="search-results" id="searchResults">
-                        <ul class="results-list" id="resultsList"></ul>
+                </div>
+
+                <!-- 搜索结果区域：单列列表样式 + 空状态 -->
+                <div class="search-results">
+                    <div class="list-header">
+                        <span class="list-label"><i class="fas fa-star"></i> <%=title %></span>
+                    </div>
+                    <div class="results-list" id="resultsList">
+                        <% storyList.forEach(function(story){ %>
+                        <article class="list-item">
+                            <h2 class="list-title">
+                                <i class="fas fa-star star-icon" aria-hidden="true"></i>
+                                <a href="/story/<%=story.id %>" target="_blank" rel="noopener"><%=story.title %></a>
+                            </h2>
+                            <div class="list-meta">分类：<%=story.category_name %></div>
+                            <p class="list-excerpt"><%=story.excerpt %></p>
+                        </article>
+                        <% }); %>
+                    </div>
+                    <div class="empty-state" id="emptyState" style="display:none;">
+<!--                         <i class="fas fa-search"></i> -->
+                        <p>没有找到相关故事，试试其他关键词～</p>
                     </div>
                 </div>
 
@@ -50,119 +87,55 @@
         <script type="text/javascript">
             loadlive2d("live2d", "/live2d/model/xiaoban/model.json");
         </script>
-        <script>
+        <script src="/javascripts/search.js"></script>
+<!--         <script> -->
+<!--             document.addEventListener('DOMContentLoaded', async () => { -->
+<!--                 // 打开搜索与主题 -->
+<!--                 toggleSearchBox(); -->
+<!--                 checkSavedTheme(); -->
 
-            let currentState = {
-                searchKeyword: '',
-            }
+<!--                 // 事件绑定 -->
+<!--                 const closeBtn = document.getElementById('searchClose'); -->
+<!--                 closeBtn?.addEventListener('click', closeSearchBox); -->
 
-            // 假数据：模拟搜索到的故事
-            const mockStories = [
-                { id: 101, title: '深夜的雨', category_name: '恐怖', excerpt: '窗外的雨声忽远忽近，仿佛有人在低语……' },
-                { id: 102, title: '奶奶的糖罐', category_name: '亲情', excerpt: '每次翻开糖罐，都是童年的味道与爱。' },
-                { id: 103, title: '小熊找星星', category_name: '儿童', excerpt: '小熊和月亮约定，一起数天上的星星。' },
-                { id: 104, title: '旅途中的灯塔', category_name: '励志', excerpt: '远方的灯塔提醒着我，不要忘记方向。' },
-                { id: 105, title: '枫叶小镇', category_name: '睡前', excerpt: '夜风轻拂枫叶，故事在微光中慢慢展开。' },
-                { id: 106, title: '旧书店的秘密', category_name: '奇幻', excerpt: '翻开一本旧书，竟能听见过去的声音。' },
-                { id: 107, title: '回信', category_name: '爱情', excerpt: '他在信尾写下：愿你安好，愿我如愿。' },
-                { id: 108, title: '白墙上的影子', category_name: '悬疑', excerpt: '影子每天都在变，只有我知道它在说什么。' },
-                { id: 109, title: '河边的蒲公英', category_name: '治愈', excerpt: '轻轻一吹，愿望与种子一起飞远。' },
-                { id: 110, title: '面包与星光', category_name: '温馨', excerpt: '一家人围坐，有面包有故事也有星光。' }
-            ];
+<!--                 const searchInput = document.getElementById('searchInput'); -->
+<!--                 if (searchInput) { -->
+<!--                     searchInput.addEventListener('keydown', async (e) => { -->
+<!--                         if (e.key === 'Enter') { -->
+<!--                             debugger -->
+<!--                             const keyword = (searchInput?.value || '').trim().toLowerCase(); -->
+<!--                             const res = await fetch('/story/search/page?keyword=' + keyword,{ -->
+<!--                                 headers: {'x-search': 'true'} -->
+<!--                             }); -->
+<!--                         } -->
+<!--                     }); -->
+<!--                 } -->
+<!--             }); -->
 
-            function escapeHtml(str) {
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            }
+<!--             function toggleSearchBox() { -->
+<!--                 const searchBox = document.getElementById('floatingSearch'); -->
+<!--                 const searchInput = document.getElementById('searchInput'); -->
+<!--                 if(currentState.searchKeyword){ -->
+<!--                     searchInput.value = currentState.searchKeyword; -->
+<!--                 } -->
+<!--                 if (!searchBox.classList.contains('active')) { -->
+<!--                     searchBox.classList.add('active'); -->
+<!--                 } -->
+<!--                 setTimeout(() => searchInput.focus(), 300); -->
+<!--             } -->
 
-            function renderResults(list) {
-                const ul = document.getElementById('resultsList');
-                if (!ul) return;
-                if (!list || list.length === 0) {
-                    ul.innerHTML = '<li class="result-item">没有找到相关故事，试试其他关键词～</li>';
-                    return;
-                }
-                ul.innerHTML = list.map(s => `
-                    <li class="result-item">
-                        <a class="result-title" href="/story/${s.id}" target="_blank">${escapeHtml(s.title)}</a>
-                        <div class="result-meta">分类：${escapeHtml(s.category_name)}</div>
-                        <div class="result-excerpt">${escapeHtml(s.excerpt)}</div>
-                    </li>
-                `).join('');
-            }
+<!--             function closeSearchBox() { -->
+<!--                 const searchInput = document.getElementById('searchInput'); -->
+<!--                 searchInput.value = ''; -->
+<!--                 currentState.searchKeyword = ''; -->
+<!--             } -->
 
-            function performSearch() {
-                const input = document.getElementById('searchInput');
-                const kw = (input?.value || '').trim().toLowerCase();
-                const filtered = kw
-                    ? mockStories.filter(s => (s.title + s.excerpt + s.category_name).toLowerCase().includes(kw))
-                    : mockStories;
-                renderResults(filtered);
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('searchClose').addEventListener('click', closeSearchBox);
-                toggleSearchBox();
-                checkSavedTheme();
-
-                // 初次加载显示假数据列表
-                renderResults(mockStories);
-
-                // 回车触发搜索
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            performSearch();
-                        }
-                    });
-                }
-            });
-
-            function toggleSearchBox() {
-                const searchBox = document.getElementById('floatingSearch');
-                const searchInput = document.getElementById('searchInput');
-                if(currentState.searchKeyword){
-                    searchInput.value = currentState.searchKeyword;
-                }
-                if (!searchBox.classList.contains('active')) {
-                    searchBox.classList.add('active');
-                    document.body.classList.add('modal-open');
-                    // 延迟聚焦以等待过渡动画完成
-                    setTimeout(() => {
-                        searchInput.focus();
-                    }, 300);
-                }
-            }
-
-            function closeSearchBox() {
-
-                window.history.back();
-
-//                 const searchBox = document.getElementById('floatingSearch');
-//                 const searchInput = document.getElementById('searchInput');
-//
-//                 searchBox.classList.remove('active');
-//                 document.body.classList.remove('modal-open');
-//                 searchInput.value = '';
-            }
-
-//             window.addEventListener('popstate', async () => {
-//                 const res = await fetch(location.pathname, { headers: { 'X-Partial': 'true' } });
-//                 const html = await res.text();
-//                 document.querySelector('#storyGrid').innerHTML = html;
-//             });
-
-            function checkSavedTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-theme');
-                }
-            }
-        </script>
+<!--             function checkSavedTheme() { -->
+<!--                 const savedTheme = localStorage.getItem('theme'); -->
+<!--                 if (savedTheme === 'dark') { -->
+<!--                     document.body.classList.add('dark-theme'); -->
+<!--                 } -->
+<!--             } -->
+<!--         </script> -->
     </body>
  </html>
