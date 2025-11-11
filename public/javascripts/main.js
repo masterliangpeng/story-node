@@ -28,6 +28,12 @@ const elements = {
     categorySettingsList: document.getElementById('categorySettingsList'),
     settingsClose: document.getElementById('settingsClose'),
     categoryTags: document.getElementById('categoryTags'),
+    homeSelectBtn: document.getElementById('homeSelectBtn'),
+    homeModal: document.getElementById('homeModal'),
+    homeOptions: document.getElementById('homeOptions'),
+    homeCancelBtn: document.getElementById('homeCancelBtn'),
+    homeModalBackdrop: document.getElementById('homeModalBackdrop'),
+    homeConfirmBtn: document.getElementById('homeConfirmBtn'),
 };
 
 const sidebarElements = {
@@ -37,9 +43,17 @@ const sidebarElements = {
     categorySettingsButton: document.getElementById('categorySettingsButton'),
     themeToggle: document.getElementById('themeToggle'),
     refreshButton: document.getElementById('refreshButton'),
+    viewModeToggle: document.getElementById('viewModeToggle'),
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // 页面加载时检测
+    detectMobileAndRedirect();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', detectMobileAndRedirect);
+
     //欢迎动画
     showWelcomeAnimation();
 
@@ -99,13 +113,6 @@ function bindCategoryClick(){
             const activeCategoryId = a.getAttribute('data-id');
             currentState.activeCategoryId = activeCategoryId;
             document.cookie = 'activeCategoryId=' + activeCategoryId + '; path=/;';
-
-            // if (isNullOrUndefined(getCookie('selectedCategoryIds'))) {
-            //     const res = await fetch('/story/initCategoryId');
-            //     const result = await res.json();
-            //     document.cookie = 'selectedCategoryIds=' + result.defaultCategoryIds + '; path=/;';
-            //     currentState.selectedCategoryIds = JSON.stringify(result.defaultCategoryIds);
-            // }
 
             // 异步加载分类内容
             try {
@@ -242,14 +249,39 @@ function initSidebar() {
             toggleFunctionDropdown();
         }
     });
-
     // 从功能下拉菜单中移动原有功能按钮的事件监听
-    // sidebarElements.viewModeToggle.addEventListener('click', toggleViewMode);
+    sidebarElements.viewModeToggle.addEventListener('click', openHomeModal);
     sidebarElements.categorySettingsButton.addEventListener('click', openCategorySettingsModal);
     sidebarElements.themeToggle.addEventListener('click', toggleTheme);
     sidebarElements.refreshButton.addEventListener('click', refreshHome);
-
     elements.settingsClose.addEventListener('click', closeCategorySettingsModal);
+    //选择主页按钮事件监听
+    elements.homeCancelBtn.addEventListener('click', closeHomeModal);
+    elements.homeModalBackdrop.addEventListener('click', closeHomeModal);
+    elements.homeOptions.addEventListener('click', (e) => {
+        const option = e.target.closest('.home-option');
+        if (!option) return;
+        const selected = option.dataset.home;
+        currentState.homeChoice = selected;
+        applyHomeSelectionUI(selected);
+    });
+
+    // 确认选择后存储至本地
+    elements.homeConfirmBtn?.addEventListener('click', () => {
+        if (!currentState.homeChoice) return;
+        localStorage.setItem('homepage', currentState.homeChoice);
+        closeHomeModal();
+        const homepage = localStorage.getItem('homepage');
+        if(homepage === 'home2'){
+            window.location.href = '/';
+        }else if(homepage === 'home1'){
+            window.location.href = '/story/home/index';
+        }
+    });
+
+    // 初始化已选择的主页
+    initHomeSelection();
+
     //检查并应用存储的主题
     checkSavedTheme();
 
@@ -275,6 +307,37 @@ function initSidebar() {
         }
     }
 }
+
+function openHomeModal(){
+    // 禁止背景滚动
+    elements.homeModal.classList.add('active');
+    // 禁止背景滚动
+    document.body.classList.add('modal-open');
+}
+function closeHomeModal() {
+    // 恢复背景滚动
+    elements.homeModal.classList.remove('active');
+    // 禁止背景滚动
+    document.body.classList.remove('modal-open');
+}
+
+function initHomeSelection() {
+    const saved = localStorage.getItem('homepage');
+    if (!saved) return;
+    currentState.homeChoice = saved;
+    applyHomeSelectionUI(saved);
+}
+
+function applyHomeSelectionUI(value) {
+    const homeOptions = document.getElementById('homeOptions');
+    if (!homeOptions) return;
+    const options = homeOptions.querySelectorAll('.home-option');
+    options.forEach(opt => {
+        const isSelected = opt.dataset.home === value;
+        opt.classList.toggle('selected', isSelected);
+    });
+}
+
 
 // 切换侧边栏显示/隐藏
 function toggleSidebar() {
@@ -712,6 +775,25 @@ function showStoryCardAnimation() {
     }
     //滚动条复原
     window.scrollTo(0, 0);
+}
+
+
+// 检测移动端设备并跳转
+function detectMobileAndRedirect() {
+    // 检测屏幕宽度
+    const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+    // 检测用户代理字符串
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+
+    // 如果屏幕宽度小于768px或检测到移动设备，则跳转到app.html
+    if (screenWidth <= 768 || isMobileDevice) {
+        // 避免无限重定向，检查当前页面是否已经是app.html
+        if (!window.location.pathname.includes('/app')) {
+            window.location.href = '/app';
+        }
+    }
 }
 
 async function fetchCategory() {

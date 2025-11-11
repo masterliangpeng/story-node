@@ -1802,71 +1802,6 @@ input:focus, select:focus, button:focus {
     animation: fadeIn 0.3s ease forwards;
 }
 
-/* 添加自定义复选框样式 */
-/*.custom-checkbox {*/
-/*    position: relative;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    width: 100%;*/
-/*}*/
-
-/*.custom-checkbox input[type="checkbox"] {*/
-/*    opacity: 0;*/
-/*    position: absolute;*/
-/*}*/
-
-/*.custom-checkbox label {*/
-/*    padding-left: 30px;*/
-/*    cursor: pointer;*/
-/*    font-size: 15px;*/
-/*    color: var(--text-primary);*/
-/*    position: relative;*/
-/*    width: 100%;*/
-/*    white-space: nowrap;*/
-/*    overflow: hidden;*/
-/*    text-overflow: ellipsis;*/
-/*    display: block;*/
-/*}*/
-
-/*.custom-checkbox label:before {*/
-/*    content: '';*/
-/*    position: absolute;*/
-/*    left: 0;*/
-/*    top: 0;*/
-/*    width: 18px;*/
-/*    height: 18px;*/
-/*    border: 2px solid var(--border-color);*/
-/*    border-radius: 4px;*/
-/*    background-color: var(--surface-color);*/
-/*    transition: all 0.2s ease;*/
-/*}*/
-
-/*.custom-checkbox input[type="checkbox"]:checked + label:before {*/
-/*    background-color: var(--primary-color);*/
-/*    border-color: var(--primary-color);*/
-/*}*/
-
-/*.custom-checkbox input[type="checkbox"]:checked + label:after {*/
-/*    content: '\f00c';*/
-/*    font-family: 'Font Awesome 5 Free';*/
-/*    font-weight: 900;*/
-/*    position: absolute;*/
-/*    left: 3px;*/
-/*    top: 0;*/
-/*    color: var(--text-on-primary);*/
-/*    font-size: 12px;*/
-/*}*/
-
-/*.custom-checkbox input[type="checkbox"]:disabled + label {*/
-/*    opacity: 0.5;*/
-/*    cursor: not-allowed;*/
-/*}*/
-
-/*.custom-checkbox input[type="checkbox"]:disabled + label:before {*/
-/*    background-color: var(--border-color);*/
-/*    border-color: var(--border-color);*/
-/*}*/
-
 /* 禁止页面滚动的样式 */
 body.modal-open::after {
     content:'';
@@ -1875,6 +1810,13 @@ body.modal-open::after {
     position: fixed;
     width: 100%;
 }
+
+/*body.modal-open {*/
+/*    overflow: hidden;*/
+/*    height: 100vh;*/
+/*    position: fixed;*/
+/*    width: 100%;*/
+/*}*/
 
 /* 简约模式样式 */
 body.simple-mode .content-card {
@@ -2086,7 +2028,7 @@ body.simple-mode .card-category {
     width: 280px;
     background-color: var(--surface-color);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
-    z-index: 100;
+    z-index: 10;
     overflow-y: auto;
     overflow-x: hidden;
     transition: transform 0.3s ease, width 0.3s ease;
@@ -2805,4 +2747,119 @@ header {
 /* 暗色主题下的加载遮罩 */
 .dark-theme .loading-overlay {
     background-color: rgba(18, 18, 18, 0.95);
+}
+
+
+/* 主页选择弹窗 */
+.home-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    background-color:rgba(0, 0, 0, 0.5);
+    backdrop-filter:blur(8px);
+}
+
+.home-modal.active {
+    display: flex;
+}
+
+.home-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.home-modal-content {
+    position: relative;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--hover-shadow);
+    border-radius: 16px;
+    width: 720px;
+    max-width: 92%;
+    padding: 20px;
+    animation: fadeInUp 0.25s ease-out both;
+}
+
+.home-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.home-options {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.home-option {
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    width: 320px;
+    max-width: 44vw;
+}
+
+.home-option:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.home-option.selected {
+    border-color: var(--accent-color);
+}
+
+.home-option img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.home-option-label {
+    text-align: center;
+    padding: 10px;
+    color: var(--text-secondary);
+}
+
+.home-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+.home-confirm-btn {
+    border: 1px solid var(--primary-color);
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.home-confirm-btn:hover { transform: translateY(-1px); }
+.home-confirm-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.home-cancel-btn {
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.home-cancel-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }

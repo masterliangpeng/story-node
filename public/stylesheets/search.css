@@ -11,8 +11,6 @@
     --text-hint: #9E9E9E;
     --text-on-primary: #FFFFFF;
     --border-color: #FFFFFF;
-    --shadow-color: rgba(0, 0, 0, 0.08);
-    --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
     --hover-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
     --card-radius: 16px;
     --button-radius: 24px;
@@ -39,7 +37,6 @@
     --text-on-primary: #FFFFFF;
     --border-color: #333333;
     --shadow-color: rgba(0, 0, 0, 0.2);
-    --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     --hover-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -56,19 +53,6 @@ body {
     transition: background-color 0.5s ease, color 0.5s ease;
     margin: 0;
     padding: 0;
-}
-
-/* 顶部品牌与关闭按钮布局 */
-.home-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    z-index: 10;
 }
 
 .brand {
@@ -300,6 +284,158 @@ body {
     background-color: rgba(18, 18, 18, 0.98);
 }
 
+/* 顶部品牌与关闭按钮布局 */
+.home-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    z-index: 10;
+}
+
+/* 主页选择按钮（右上角） */
+.home-select {
+    position: fixed;
+    top: 30px;
+    right: 80px; /* 与关闭按钮错开 */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface-color);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: scale(0.8);
+}
+
+.home-select:hover {
+    transform: scale(1.1);
+    color: var(--primary-color);
+    background-color: var(--surface-color);
+}
+
+/* 主页选择弹窗 */
+.home-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+.home-modal.active {
+    display: flex;
+}
+
+.home-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.home-modal-content {
+    position: relative;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--hover-shadow);
+    border-radius: 16px;
+    width: 720px;
+    max-width: 92%;
+    padding: 20px;
+    animation: fadeInUp 0.25s ease-out both;
+}
+
+.home-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.home-options {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.home-option {
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    width: 320px;
+    max-width: 44vw;
+}
+
+.home-option:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.home-option.selected {
+    border-color: var(--accent-color);
+}
+
+.home-option img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.home-option-label {
+    text-align: center;
+    padding: 10px;
+    color: var(--text-secondary);
+}
+
+.home-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+.home-confirm-btn {
+    border: 1px solid var(--primary-color);
+    background: var(--primary-color);
+    color: var(--text-on-primary);
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.home-confirm-btn:hover { transform: translateY(-1px); }
+.home-confirm-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.home-cancel-btn {
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.home-cancel-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
 
 .search-results {
     width: 100%;
@@ -356,10 +492,12 @@ body {
     align-items: center;
     gap: 6px;
 }
+
 .list-title .star-icon {
     color: var(--accent-color);
     font-size: 14px;
 }
+
 .list-title a {
     color: var(--text-primary);
     text-decoration: none;
@@ -382,8 +520,13 @@ body {
     border-bottom-color: #414141;
 }
 
-.list-item:hover .list-title a { color: var(--primary-color); }
-.list-item:hover .star-icon { color: var(--accent-color); }
+.list-item:hover .list-title a {
+    color: var(--primary-color);
+}
+
+.list-item:hover .star-icon {
+    color: var(--accent-color);
+}
 
 .list-meta {
     font-size: 12px;
@@ -421,8 +564,8 @@ body.dark-theme .list-excerpt {
     /*align-items: center;*/
     /*justify-content: center;*/
     /*flex-direction: column;*/
-    position:fixed;
-    top:30%;
+    position: fixed;
+    top: 30%;
     gap: 8px;
     color: var(--text-secondary);
     padding: 24px;
@@ -514,6 +657,22 @@ body.dark-theme .result-excerpt {
     color: #cfcfcf;
 }
 
+/* 渲染入场动画 */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.list-item.animate-in {
+    animation: fadeInUp 0.3s ease-out both;
+}
+
 
 /* 响应式设计中也需要调整 */
 @media (max-width: 768px) {
@@ -558,6 +717,18 @@ body.dark-theme .result-excerpt {
         width: 36px;
         height: 36px;
         font-size: 14px;
+    }
+
+    .home-select {
+        top: 20px;
+        right: 70px;
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .home-modal-content {
+        width: 92%;
     }
 }
 

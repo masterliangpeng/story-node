@@ -3,51 +3,51 @@ const router = express.Router();
 const supabase = require('./server');
 const pageMaxSize = 50;
 
-router.get("/sitemap.xml", async (req, res) => {
-    res.header("Content-Type", "application/xml");
-
-    // === 1. 首页 ===
-    const homeUrl = `
-    <url>
-      <loc>https://storynook.cn/</loc>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
-    </url>
-  `;
-
-    // === 2. 分类页 ===
-    // 假设从数据库查询分类
-    const categories = await db.query("SELECT id FROM categories");
-    const categoryUrls = categories.map(c => `
-    <url>
-      <loc>https://yourdomain.com/story/list/${c.id}/1</loc>
-      <changefreq>weekly</changefreq>
-      <priority>0.9</priority>
-    </url>
-  `).join("");
-
-    // === 3. 故事页 ===
-    // 假设 stories 表里有 id 和 updatedAt 字段
-    const stories = await db.query("SELECT id, updatedAt FROM stories");
-    const storyUrls = stories.map(s => `
-    <url>
-      <loc>https://yourdomain.com/story/${s.id}</loc>
-      <lastmod>${new Date(s.updatedAt).toISOString().split("T")[0]}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
-    </url>
-  `).join("");
-
-    // === 4. 组装 sitemap.xml ===
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${homeUrl}
-    ${categoryUrls}
-    ${storyUrls}
-  </urlset>`;
-
-    res.send(xml);
-});
+// router.get("/sitemap.xml", async (req, res) => {
+//     res.header("Content-Type", "application/xml");
+//
+//     // === 1. 首页 ===
+//     const homeUrl = `
+//     <url>
+//       <loc>https://storynook.cn/</loc>
+//       <changefreq>daily</changefreq>
+//       <priority>1.0</priority>
+//     </url>
+//   `;
+//
+//     // === 2. 分类页 ===
+//     // 假设从数据库查询分类
+//     const categories = await db.query("SELECT id FROM categories");
+//     const categoryUrls = categories.map(c => `
+//     <url>
+//       <loc>https://yourdomain.com/story/list/${c.id}/1</loc>
+//       <changefreq>weekly</changefreq>
+//       <priority>0.9</priority>
+//     </url>
+//   `).join("");
+//
+//     // === 3. 故事页 ===
+//     // 假设 stories 表里有 id 和 updatedAt 字段
+//     const stories = await db.query("SELECT id, updatedAt FROM stories");
+//     const storyUrls = stories.map(s => `
+//     <url>
+//       <loc>https://yourdomain.com/story/${s.id}</loc>
+//       <lastmod>${new Date(s.updatedAt).toISOString().split("T")[0]}</lastmod>
+//       <changefreq>monthly</changefreq>
+//       <priority>0.8</priority>
+//     </url>
+//   `).join("");
+//
+//     // === 4. 组装 sitemap.xml ===
+//     const xml = `<?xml version="1.0" encoding="UTF-8"?>
+//   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//     ${homeUrl}
+//     ${categoryUrls}
+//     ${storyUrls}
+//   </urlset>`;
+//
+//     res.send(xml);
+// });
 
 //初始化加载
 router.get('/', async (req, res, next) => {
@@ -225,23 +225,28 @@ router.get('/story/:id', async (req, res) => {
     });
 });
 
+router.get('/story/home/index', async (req, res) => {
+    const options = {limit: 20}
+    let {data, error} = await supabase.randomFetchData('story_main', options);
+    res.render('redirect/index', {
+        storyList: data,
+        title: '推荐故事'
+    });
+})
+
 router.get('/story/search/page', async (req, res) => {
     let keyword = req.query.keyword;
-    console.log('keyword:',keyword);
-    console.log('req.headers[\'x-search\']:',req.headers['x-search']);
     if (req.headers['x-search'] && !isNullOrUndefined(keyword)) {
         const options = {
             filterLike: {title: keyword}
         }
         let {data, error} = await supabase.fetchData('story_main',options)
         res.json( {
-            storyList: data,
-            title: '搜素故事'
+            storyList: data
         });
     } else {
         const options = {limit: 20}
         let {data, error} = await supabase.randomFetchData('story_main', options);
-
         res.render('search', {
             storyList: data,
             title: '推荐故事'
