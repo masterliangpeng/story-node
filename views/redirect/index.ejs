@@ -10,7 +10,13 @@
     <link rel="stylesheet" href="/live2d/css/live2d.css"/>
     <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
     <script>
-
+        function redirectHome(){
+            const homepage = localStorage.getItem('homepage');
+            if(homepage && homepage !== null && homepage.trim() !== '' && homepage === 'home2'){
+                window.location.href = '/';
+            }
+        }
+        redirectHome();
     </script>
 </head>
     <body>
@@ -21,9 +27,6 @@
             </div>
             <button class="home-select" id="homeSelectBtn" aria-label="选择主页">
                 <i class="fas fa-home"></i>
-            </button>
-            <button class="search-close" id="searchClose" aria-label="关闭">
-                <i class="fas fa-times"></i>
             </button>
         </header>
         <main>

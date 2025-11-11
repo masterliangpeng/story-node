@@ -10,6 +10,7 @@ let currentState = {
     isLoading: true,   // 是否正在加载数据
     hasMoreData: false,   // 是否还有更多数据
     isSimpleMode: false,  // 是否为简约模式
+    homeChoice: 'home2',
     welcomeMsg: ['欢迎来到《小故事铺》这里藏着一段段温暖的小故事，等你慢慢翻阅，慢慢收藏，和我们一起，在文字里遇见生活的温度',
         '欢迎光临《小故事铺》✨ 星光为笔，梦境作纸，每个故事，都藏着属于你的奇遇',
         '欢迎来到小故事铺 这里的故事都在等你翻开',
@@ -56,6 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     //欢迎动画
     showWelcomeAnimation();
+
+    //判断是否重定向到主页1
+    redirectHome();
 
     //初始化侧边栏
     initSidebar();
@@ -258,26 +262,10 @@ function initSidebar() {
     //选择主页按钮事件监听
     elements.homeCancelBtn.addEventListener('click', closeHomeModal);
     elements.homeModalBackdrop.addEventListener('click', closeHomeModal);
-    elements.homeOptions.addEventListener('click', (e) => {
-        const option = e.target.closest('.home-option');
-        if (!option) return;
-        const selected = option.dataset.home;
-        currentState.homeChoice = selected;
-        applyHomeSelectionUI(selected);
-    });
+    elements.homeOptions.addEventListener('click', (e) => choiceHome(e));
 
     // 确认选择后存储至本地
-    elements.homeConfirmBtn?.addEventListener('click', () => {
-        if (!currentState.homeChoice) return;
-        localStorage.setItem('homepage', currentState.homeChoice);
-        closeHomeModal();
-        const homepage = localStorage.getItem('homepage');
-        if(homepage === 'home2'){
-            window.location.href = '/';
-        }else if(homepage === 'home1'){
-            window.location.href = '/story/home/index';
-        }
-    });
+    elements.homeConfirmBtn.addEventListener('click', confirmHome);
 
     // 初始化已选择的主页
     initHomeSelection();
@@ -321,11 +309,40 @@ function closeHomeModal() {
     document.body.classList.remove('modal-open');
 }
 
+
+function choiceHome(e){
+    const option = e.target.closest('.home-option');
+    if (!option) return;
+    const selected = option.dataset.home;
+    currentState.homeChoice = selected;
+    applyHomeSelectionUI(selected);
+}
+
+
+function confirmHome(){
+    showLoading();
+    showToast('切换主页成功', 'success');
+    try {
+        localStorage.setItem('homepage', currentState.homeChoice);
+        closeHomeModal();
+        const homepage = localStorage.getItem('homepage');
+        if(homepage === 'home2'){
+            window.location.href = '/';
+        }else if(homepage === 'home1'){
+            window.location.href = '/story/home/index';
+        }
+    }finally {
+        hideLoading();
+    }
+
+}
+
 function initHomeSelection() {
     const saved = localStorage.getItem('homepage');
-    if (!saved) return;
-    currentState.homeChoice = saved;
-    applyHomeSelectionUI(saved);
+    if (!isNullOrUndefined(saved)){
+        currentState.homeChoice = saved;
+    }
+    applyHomeSelectionUI(currentState.homeChoice);
 }
 
 function applyHomeSelectionUI(value) {
@@ -793,6 +810,13 @@ function detectMobileAndRedirect() {
         if (!window.location.pathname.includes('/app')) {
             window.location.href = '/app';
         }
+    }
+}
+
+function redirectHome(){
+    const homepage = localStorage.getItem('homepage');
+    if(!isNullOrUndefined(homepage) && homepage === 'home1'){
+        window.location.href = '/story/home/index';
     }
 }
 

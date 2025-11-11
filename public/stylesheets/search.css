@@ -186,7 +186,7 @@ body {
 }
 
 .dark-theme .illustration-item {
-    background: #1c1c1c;
+    background: var(--background-color);
     border-color: transparent;
     box-shadow: none;
 }

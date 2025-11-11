@@ -1,6 +1,5 @@
 let currentState = {
-    searchKeyword: '',
-    homeChoice: ''
+    homeChoice: 'home2'
 }
 const elements = {
     closeBtn: document.getElementById('searchClose'),
@@ -14,78 +13,62 @@ const elements = {
     homeModalBackdrop: document.getElementById('homeModalBackdrop'),
     homeConfirmBtn: document.getElementById('homeConfirmBtn'),
 };
+
 document.addEventListener('DOMContentLoaded', async () => {
     // 打开搜索与主题
     toggleSearchBox();
+
     checkSavedTheme();
 
-    // 事件关闭页面绑定
-    elements.closeBtn?.addEventListener('click', closeSearchBox);
+    if(window.location.pathname.includes('/home/index')){
+        // 主页选择按钮与弹窗交互
+        elements.homeSelectBtn.addEventListener('click', () => openHomeModal());
+        elements.homeCancelBtn.addEventListener('click', () => closeHomeModal());
+        elements.homeModalBackdrop.addEventListener('click', () => closeHomeModal());
+        elements.homeOptions.addEventListener('click', (e)=> choiceHome(e));
+
+        // 确认选择后存储至本地
+        elements.homeConfirmBtn.addEventListener('click', () => confirmHome());
+
+        // 初始化已选择的主页
+        initHomeSelection();
+    }else{
+        // 事件关闭页面绑定
+        elements.closeBtn.addEventListener('click', closeSearchBox);
+    }
+
     // 搜索事件
     if (elements.searchInput) {
         elements.searchInput.addEventListener('keydown', async (e) => {
             if (e.key === 'Enter') {
-                const keyword = (elements.searchInput?.value || '').trim();
+                const keyword = (elements.searchInput.value || '').trim();
                 await performSearch(keyword);
             }
         });
     }
 
     // 快速标签点击搜索
-    elements.quickTags?.addEventListener('click', async (e) => {
+    elements.quickTags.addEventListener('click', async (e) => {
         const tagBtn = e.target.closest('.tag');
         if (!tagBtn) return;
         const tag = tagBtn.dataset.tag || tagBtn.textContent.trim();
         if (elements.searchInput) elements.searchInput.value = tag;
         await performSearch(tag);
     });
-
-    // 主页选择按钮与弹窗交互
-    elements.homeSelectBtn?.addEventListener('click', () => openHomeModal());
-    elements.homeCancelBtn?.addEventListener('click', () => closeHomeModal());
-    elements.homeModalBackdrop?.addEventListener('click', () => closeHomeModal());
-    elements.homeOptions?.addEventListener('click', (e) => {
-        const option = e.target.closest('.home-option');
-        if (!option) return;
-        const selected = option.dataset.home;
-        currentState.homeChoice = selected;
-        applyHomeSelectionUI(selected);
-        //setConfirmEnabled(true);
-    });
-
-    // 确认选择后存储至本地
-    elements.homeConfirmBtn?.addEventListener('click', () => {
-        if (!currentState.homeChoice) return;
-        localStorage.setItem('homepage', currentState.homeChoice);
-        closeHomeModal();
-        const homepage = localStorage.getItem('homepage');
-        if(homepage === 'home2'){
-            window.location.href = '/';
-        }else if(homepage === 'home1'){
-            window.location.href = '/story/home/index';
-        }
-    });
-
-    // 初始化已选择的主页
-    initHomeSelection();
 });
 
 function toggleSearchBox() {
     const searchBox = document.getElementById('floatingSearch');
     const searchInput = document.getElementById('searchInput');
-    if (currentState.searchKeyword) {
-        searchInput.value = currentState.searchKeyword;
-    }
     if (!searchBox.classList.contains('active')) {
         searchBox.classList.add('active');
     }
     setTimeout(() => searchInput.focus(), 300);
 }
 
+//关闭页面
 function closeSearchBox() {
-    const searchInput = document.getElementById('searchInput');
-    searchInput.value = '';
-    currentState.searchKeyword = '';
+    window.history.back();
 }
 
 function checkSavedTheme() {
@@ -98,14 +81,11 @@ function checkSavedTheme() {
 // 执行搜索
 async function performSearch(keyword) {
     const k = (keyword || '').trim().toLowerCase();
-    if (!k) return;
-
-    currentState.searchKeyword = k;
-    updateListLabel(`搜索 “${k}” 的结果`);
-
-    // 显示骨架屏
-    //renderSkeleton(6);
-
+    if(isNullOrUndefined(k)){
+        updateListLabel('推荐故事');
+    }else{
+        updateListLabel(`搜索 “${k}” 的结果`);
+    }
     try {
         const res = await fetch('/story/search/page?keyword=' + encodeURIComponent(k), {
             headers: {'x-search': 'true'}
@@ -114,7 +94,6 @@ async function performSearch(keyword) {
         const data = await res.json();
         const list = data?.storyList || [];
         renderResults(list);
-        //if (data?.title) updateListLabel(data.title);
     } catch (err) {
         console.error(err);
         renderResults([]);
@@ -125,23 +104,6 @@ function updateListLabel(text) {
     const label = document.getElementById('listLabel') || document.querySelector('.list-label');
     if (label && text) label.textContent = text;
 }
-
-// function renderSkeleton(count = 6) {
-//     const resultsList = document.getElementById('resultsList');
-//     const emptyState = document.getElementById('emptyState');
-//     if (emptyState) emptyState.style.display = 'none';
-//     if (!resultsList) return;
-//     let html = '';
-//     for (let i = 0; i < count; i++) {
-//         html += `
-//         <article class="list-item" aria-hidden="true">
-//             <div class="skeleton skeleton-title"></div>
-//             <div class="skeleton skeleton-text"></div>
-//             <div class="skeleton skeleton-text short"></div>
-//         </article>`;
-//     }
-//     resultsList.innerHTML = html;
-// }
 
 function renderResults(storyList) {
     const resultsList = document.getElementById('resultsList');
@@ -186,11 +148,32 @@ function closeHomeModal() {
     elements.homeModal.classList.remove('active');
 }
 
+function choiceHome(e){
+    const option = e.target.closest('.home-option');
+    if (!option) return;
+    const selected = option.dataset.home;
+    currentState.homeChoice = selected;
+    applyHomeSelectionUI(selected);
+}
+
+
+function confirmHome(){
+    localStorage.setItem('homepage', currentState.homeChoice);
+    closeHomeModal();
+    const homepage = localStorage.getItem('homepage');
+    if(homepage === 'home2'){
+        window.location.href = '/';
+    }else if(homepage === 'home1'){
+        window.location.href = '/story/home/index';
+    }
+}
+
 function initHomeSelection() {
     const saved = localStorage.getItem('homepage');
-    if (!saved) return;
-    currentState.homeChoice = saved;
-    applyHomeSelectionUI(saved);
+    if (!isNullOrUndefined(saved)){
+        currentState.homeChoice = saved;
+    }
+    applyHomeSelectionUI(currentState.homeChoice);
 }
 
 function applyHomeSelectionUI(value) {
@@ -203,6 +186,9 @@ function applyHomeSelectionUI(value) {
     });
 }
 
+function isNullOrUndefined(value) {
+    return typeof value === 'undefined' || value === null || value === '';
+}
 // function setConfirmEnabled(enabled) {
 //     const btn = elements.homeConfirmBtn;
 //     if (!btn) return;
