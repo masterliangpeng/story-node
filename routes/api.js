@@ -4,52 +4,6 @@ const supabase = require('./server');
 const sitemapApi = require('./sitemapApi');
 const pageMaxSize = 50;
 
-// router.get("/sitemap.xml", async (req, res) => {
-//     res.header("Content-Type", "application/xml");
-//
-//     // === 1. 首页 ===
-//     const homeUrl = `
-//     <url>
-//       <loc>https://storynook.cn/</loc>
-//       <changefreq>daily</changefreq>
-//       <priority>1.0</priority>
-//     </url>
-//   `;
-//
-//     // === 2. 分类页 ===
-//     // 假设从数据库查询分类
-//     const categories = await db.query("SELECT id FROM categories");
-//     const categoryUrls = categories.map(c => `
-//     <url>
-//       <loc>https://storynook.cn/story/list/${c.id}/1</loc>
-//       <changefreq>weekly</changefreq>
-//       <priority>0.9</priority>
-//     </url>
-//   `).join("");
-//
-//     // === 3. 故事页 ===
-//     // 假设 stories 表里有 id 和 updatedAt 字段
-//     const stories = await db.query("SELECT id, updatedAt FROM stories");
-//     const storyUrls = stories.map(s => `
-//     <url>
-//       <loc>https://storynook.cn/story/${s.id}</loc>
-//       <lastmod>${new Date(s.updatedAt).toISOString().split("T")[0]}</lastmod>
-//       <changefreq>monthly</changefreq>
-//       <priority>0.8</priority>
-//     </url>
-//   `).join("");
-//
-//     // === 4. 组装 sitemap.xml ===
-//     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-//     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-//     ${homeUrl}
-//     ${categoryUrls}
-//     ${storyUrls}
-//     </urlset>`;
-//
-//     res.send(xml);
-// });
-
 //初始化加载
 router.get('/', async (req, res, next) => {
     let categoryList
@@ -253,7 +207,8 @@ router.get('/story/search/page', async (req, res) => {
         });
     }else if(req.headers['x-search-tag']){
         const options = {
-            filter: {category_id: keyword}
+            filter: {category_id: keyword},
+            orderBy: {column: 'id', ascending: true},
         }
         let {data, error} = await supabase.fetchData('story_main', options)
         res.json({
