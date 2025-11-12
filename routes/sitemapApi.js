@@ -54,7 +54,6 @@ router.get("/sitemap-category.xml", async (req, res) => {
 // 分页故事 sitemap
 router.get("/sitemap-story-:categoryId.xml", async (req, res) => {
     const categoryId = req.params.categoryId;
-    console.log('categoryId:',categoryId);
     let options = {
         orderBy: {column: 'id', ascending: true},
         filter: {category_id: categoryId}

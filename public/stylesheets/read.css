@@ -118,6 +118,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     align-self: flex-start;
     width: auto;
+    text-decoration: none; /* a 标签样式重置 */
 }
 
 .back-btn:after {
@@ -146,14 +147,22 @@ body {
     transform: translateX(-5px) scale(0.98);
 }
 
-.back-btn i {
+/* 返回按钮 logo 图标样式 */
+.back-logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+/* .back-btn i {
     font-size: 14px;
     transition: transform 0.2s ease;
 }
 
 .back-btn:hover i {
     transform: translateX(-3px);
-}
+} */
 
 
 .article-title {
