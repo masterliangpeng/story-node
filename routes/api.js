@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('./server');
+const sitemapApi = require('./sitemapApi');
 const pageMaxSize = 50;
 
 // router.get("/sitemap.xml", async (req, res) => {
@@ -20,7 +21,7 @@ const pageMaxSize = 50;
 //     const categories = await db.query("SELECT id FROM categories");
 //     const categoryUrls = categories.map(c => `
 //     <url>
-//       <loc>https://yourdomain.com/story/list/${c.id}/1</loc>
+//       <loc>https://storynook.cn/story/list/${c.id}/1</loc>
 //       <changefreq>weekly</changefreq>
 //       <priority>0.9</priority>
 //     </url>
@@ -31,7 +32,7 @@ const pageMaxSize = 50;
 //     const stories = await db.query("SELECT id, updatedAt FROM stories");
 //     const storyUrls = stories.map(s => `
 //     <url>
-//       <loc>https://yourdomain.com/story/${s.id}</loc>
+//       <loc>https://storynook.cn/story/${s.id}</loc>
 //       <lastmod>${new Date(s.updatedAt).toISOString().split("T")[0]}</lastmod>
 //       <changefreq>monthly</changefreq>
 //       <priority>0.8</priority>
@@ -40,11 +41,11 @@ const pageMaxSize = 50;
 //
 //     // === 4. 组装 sitemap.xml ===
 //     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-//   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+//     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 //     ${homeUrl}
 //     ${categoryUrls}
 //     ${storyUrls}
-//   </urlset>`;
+//     </urlset>`;
 //
 //     res.send(xml);
 // });
@@ -338,6 +339,6 @@ function isNullOrUndefined(value) {
     return typeof value === 'undefined' || value === null || value === '';
 }
 
-
+router.use('/', sitemapApi);
 module.exports = router;
 
