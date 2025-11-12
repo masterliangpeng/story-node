@@ -208,30 +208,6 @@ header {
     transform: translateY(-2px);
 }
 
-/*.sort-options {*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    color: var(--text-secondary);*/
-/*}*/
-
-/*.sort-options select {*/
-/*    padding: 10px 18px;*/
-/*    border-radius: var(--button-radius);*/
-/*    border: 2px solid var(--border-color);*/
-/*    font-size: 14px;*/
-/*    margin-left: 8px;*/
-/*    background-color: var(--surface-color);*/
-/*    cursor: pointer;*/
-/*    transition: all var(--transition-time);*/
-/*    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);*/
-/*}*/
-
-/*.sort-options select:focus {*/
-/*    outline: none;*/
-/*    border-color: var(--primary-color);*/
-/*    box-shadow: 0 0 0 3px rgba(93, 64, 55, 0.15);*/
-/*}*/
-
 /* 内容卡片区域 - 直接在container下 */
 .content-grid {
     display: grid;

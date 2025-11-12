@@ -12,6 +12,9 @@ const elements = {
     homeCancelBtn: document.getElementById('homeCancelBtn'),
     homeModalBackdrop: document.getElementById('homeModalBackdrop'),
     homeConfirmBtn: document.getElementById('homeConfirmBtn'),
+
+    listOverlay: document.getElementById('listOverlay'),
+    resultsList: document.getElementById('resultsList'),
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -52,8 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tagBtn = e.target.closest('.tag');
         if (!tagBtn) return;
         const tag = tagBtn.dataset.tag || tagBtn.textContent.trim();
-        if (elements.searchInput) elements.searchInput.value = tag;
-        await performSearch(tag);
+        // if (elements.searchInput) elements.searchInput.value = tag;
+        await performTagSearch(tag,tagBtn.innerText);
     });
 });
 
@@ -84,8 +87,10 @@ async function performSearch(keyword) {
     if(isNullOrUndefined(k)){
         updateListLabel('推荐故事');
     }else{
-        updateListLabel(`搜索 “${k}” 的结果`);
+        updateListLabel(`搜索 "${k}" 的结果`);
     }
+    // 打开列表局部遮罩
+    showListOverlay();
     try {
         const res = await fetch('/story/search/page?keyword=' + encodeURIComponent(k), {
             headers: {'x-search': 'true'}
@@ -94,9 +99,32 @@ async function performSearch(keyword) {
         const data = await res.json();
         const list = data?.storyList || [];
         renderResults(list);
+        hideListOverlay();
     } catch (err) {
         console.error(err);
         renderResults([]);
+        hideListOverlay();
+    }
+}
+
+//执行标签搜索
+async function performTagSearch(tagVal,tagText){
+    updateListLabel(`标签： "${tagText}" 的故事`);
+    // 打开列表局部遮罩
+    showListOverlay();
+    try {
+        const res = await fetch('/story/search/page?keyword=' + encodeURIComponent(tagVal), {
+            headers: {'x-search-tag': 'true'}
+        });
+        if (!res.ok) throw new Error('网络请求失败');
+        const data = await res.json();
+        const list = data?.storyList || [];
+        renderResults(list);
+        hideListOverlay();
+    } catch (err) {
+        console.error(err);
+        renderResults([]);
+        hideListOverlay();
     }
 }
 
@@ -140,8 +168,6 @@ function renderResults(storyList) {
 
 function openHomeModal() {
     elements.homeModal.classList.add('active');
-    // 打开时根据当前选择状态设置按钮可用性
-    //setConfirmEnabled(!!currentState.homeChoice);
 }
 
 function closeHomeModal() {
@@ -189,8 +215,32 @@ function applyHomeSelectionUI(value) {
 function isNullOrUndefined(value) {
     return typeof value === 'undefined' || value === null || value === '';
 }
-// function setConfirmEnabled(enabled) {
-//     const btn = elements.homeConfirmBtn;
-//     if (!btn) return;
-//     btn.disabled = !enabled;
-// }
+
+// 列表局部遮罩控制
+function showListOverlay() {
+    const overlay = elements.listOverlay;
+    const list = elements.resultsList;
+    if (!overlay || !list) return;
+    const rect = list.getBoundingClientRect();
+    overlay.style.top = rect.top + 'px';
+    overlay.style.left = rect.left + 'px';
+    overlay.style.width = rect.width + 'px';
+    overlay.style.height = rect.height + 'px';
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideListOverlay() {
+    const overlay = elements.listOverlay;
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
+}
+
+// 窗口尺寸变化时，若遮罩显示则更新其位置与尺寸
+// window.addEventListener('resize', () => {
+//     const overlay = elements.listOverlay;
+//     if (overlay && overlay.style.display !== 'none') {
+//         showListOverlay();
+//     }
+// });

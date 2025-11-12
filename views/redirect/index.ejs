@@ -41,16 +41,16 @@
                             <input type="text" id="searchInput" placeholder="试试：睡前、恐怖、亲情、儿童、励志…">
                         </div>
                         <div class="quick-tags" id="quickTags">
-                            <button class="tag" data-tag="睡前">睡前</button>
-                            <button class="tag" data-tag="恐怖">恐怖</button>
-                            <button class="tag" data-tag="童话">童话</button>
-                            <button class="tag" data-tag="儿童">儿童</button>
-                            <button class="tag" data-tag="益智">益智</button>
-                            <button class="tag" data-tag="历史">历史</button>
-                            <button class="tag" data-tag="预言">预言</button>
-                            <button class="tag" data-tag="成语">成语</button>
-                            <button class="tag" data-tag="格林">格林</button>
-                            <button class="tag" data-tag="作文">作文</button>
+                            <button class="tag" data-tag="1">睡前</button>
+                            <button class="tag" data-tag="11">恐怖</button>
+                            <button class="tag" data-tag="8">童话</button>
+                            <button class="tag" data-tag="2">儿童</button>
+                            <button class="tag" data-tag="5">益智</button>
+                            <button class="tag" data-tag="6">历史</button>
+                            <button class="tag" data-tag="7">预言</button>
+                            <button class="tag" data-tag="9">成语</button>
+                            <button class="tag" data-tag="3">格林</button>
+                            <button class="tag" data-tag="10">作文</button>
                         </div>
                         <!-- 插画区域：展示开源免费插画（unDraw，MIT License） -->
                         <div class="search-illustrations" aria-label="主题插画">
@@ -113,6 +113,14 @@
                 </div>
             </div>
         </main>
+        <!-- 列表局部遮罩：放在 main 元素外 -->
+        <div class="list-overlay" id="listOverlay" aria-hidden="true">
+            <div class="balls-loader" role="status" aria-label="加载中">
+                <span class="ball"></span>
+                <span class="ball"></span>
+                <span class="ball"></span>
+            </div>
+        </div>
         <script type="text/javascript" src="/live2d/js/live2d.js"></script>
         <script type="text/javascript" src="/live2d/js/message.js"></script>
         <script type="text/javascript">

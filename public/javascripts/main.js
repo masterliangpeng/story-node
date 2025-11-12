@@ -45,6 +45,7 @@ const sidebarElements = {
     themeToggle: document.getElementById('themeToggle'),
     refreshButton: document.getElementById('refreshButton'),
     viewModeToggle: document.getElementById('viewModeToggle'),
+    searchButton: document.getElementById('searchButton'),
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     //初始化侧边栏
     initSidebar();
+
+    //故事点击事件
+    bindStoryClick();
 
     let activeCategoryId = getCookie('activeCategoryId');
     let selectedCategoryIds = getCookie('selectedCategoryIds');
@@ -152,6 +156,22 @@ function bindCategoryClick(){
     });
 }
 
+//绑定故事点击事件
+function bindStoryClick(){
+    document.querySelectorAll('.content-card').forEach(card => {
+        const link = card.querySelector('a');
+        if (!link) return; // 没有链接就跳过
+
+        card.addEventListener('click', e => {
+            // 如果用户点的就是 a 标签本身，则不重复执行
+            if (e.target.tagName.toLowerCase() === 'a') return;
+
+            // 模拟点击 a 标签
+            link.click();
+        });
+    });
+}
+
 
 //欢迎页
 function showWelcomeAnimation() {
@@ -216,6 +236,8 @@ async function loadMoreStories() {
         // 获取下一页数据
         await loadStory(currentState.activeCategoryId,nextPage)
 
+        //重新绑定故事点击事件
+        bindStoryClick();
         // 更新状态
         currentState.currentPage = nextPage;
         currentState.hasMoreData = nextPage < currentState.totalPages;
@@ -244,6 +266,17 @@ function initSidebar() {
 
     // 多功能按钮点击事件
     sidebarElements.multiFunctionButton.addEventListener('click', toggleFunctionDropdown);
+
+    // 故事搜索点击事件
+    const link = sidebarElements.searchButton.querySelector('a');
+    sidebarElements.searchButton.addEventListener('click', (event) => {
+        // 如果点击的目标是 a 标签本身，说明用户已经点了链接，就不再触发
+        if (event.target.tagName.toLowerCase() === 'a') {
+            return;
+        }
+        // 否则手动触发 a 标签跳转
+        link.click();
+    });
 
     // 点击其他区域关闭下拉菜单
     document.addEventListener('click', (e) => {
@@ -563,6 +596,8 @@ async function handleCategoryToggle(categoryId, isAdd) {
         //handleCategoryChange(currentState.selectedCategoryIds[0], true);
         elements.storyGrid.innerHTML = '';
         await loadStory(currentState.selectedCategoryIds[0],1);
+        //重新绑定故事点击事件
+        bindStoryClick();
 
         const tags = document.querySelectorAll('.filter-tag');
         for (const tag of tags) {

@@ -1,0 +1,12 @@
+User-agent: *
+# 不允许爬取 JS 文件
+Disallow: /javascripts/
+Disallow: /live2d/
+# 允许爬取首页、故事页、分类页
+Allow: /$
+Allow: /story/
+Allow: /app/
+Allow: /stylesheets/
+Allow: /images/
+# 指定站点地图（如果你有）
+Sitemap: https://storynook.cn/sitemap.xml

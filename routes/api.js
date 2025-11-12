@@ -240,12 +240,19 @@ router.get('/story/search/page', async (req, res) => {
         const options = {limit: 20}
         let {data, error} = await supabase.randomFetchData('story_main', options);
         res.json({
-            storyList: data,
-            title: '推荐故事'
+            storyList: data
         });
     } else if (req.headers['x-search'] && !isNullOrUndefined(keyword)) {
         const options = {
             filterLike: {title: keyword}
+        }
+        let {data, error} = await supabase.fetchData('story_main', options)
+        res.json({
+            storyList: data
+        });
+    }else if(req.headers['x-search-tag']){
+        const options = {
+            filter: {category_id: keyword}
         }
         let {data, error} = await supabase.fetchData('story_main', options)
         res.json({
