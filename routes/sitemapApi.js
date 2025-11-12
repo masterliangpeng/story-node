@@ -44,7 +44,7 @@ router.get("/sitemap-category.xml", async (req, res) => {
     let {data, error} = await supabase.fetchData('story_category');
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     data.forEach(cat => {
-        xml += `  <url><loc>${BASE_URL}/story/${cat.id}/1</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`;
+        xml += `  <url><loc>${BASE_URL}/story/list/${cat.id}/1</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`;
     });
     xml += `</urlset>`;
     res.header("Content-Type", "application/xml");
