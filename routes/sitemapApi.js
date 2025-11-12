@@ -40,10 +40,10 @@ router.get("/sitemap-home.xml", (req, res) => {
 });
 
 // 分类页 sitemap
-router.get("/sitemap-categories.xml", async (req, res) => {
-    const categories = await db.query("SELECT id FROM categories");
+router.get("/sitemap-category.xml", async (req, res) => {
+    let {data, error} = await supabase.fetchData('story_category');
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    categories.forEach(cat => {
+    data.forEach(cat => {
         xml += `  <url><loc>${BASE_URL}/story/${cat.id}/1</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`;
     });
     xml += `</urlset>`;
@@ -53,18 +53,16 @@ router.get("/sitemap-categories.xml", async (req, res) => {
 
 // 分页故事 sitemap
 router.get("/sitemap-story-:categoryId.xml", async (req, res) => {
-    const { page } = req.params;
-    const limit = STORIES_PER_FILE;
-    const offset = (page - 1) * STORIES_PER_FILE;
-
-    const stories = await db.query(
-        "SELECT id, updated_at FROM stories ORDER BY id ASC LIMIT ? OFFSET ?",
-        [limit, offset]
-    );
-
+    const categoryId = req.params.categoryId;
+    console.log('categoryId:',categoryId);
+    let options = {
+        orderBy: {column: 'id', ascending: true},
+        filter: {category_id: categoryId}
+    };
+    let {data, error} = await supabase.fetchData('story_main', options);
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-    stories.forEach(story => {
-        xml += `  <url><loc>${BASE_URL}/story/detail/${story.id}</loc><lastmod>${new Date(story.updated_at).toISOString().split("T")[0]}</lastmod></url>\n`;
+    data.forEach(story => {
+        xml += `  <url><loc>${BASE_URL}/story/${story.id}</loc></url>\n`;
     });
     xml += `</urlset>`;
     res.header("Content-Type", "application/xml");
