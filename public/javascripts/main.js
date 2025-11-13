@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('scroll', handleScroll);
 
     // 为新添加的卡片添加淡入动画
-    showStoryCardAnimation();
+    //showStoryCardAnimation();
 });
 
 //绑定分类点击事件
@@ -145,7 +145,6 @@ function bindCategoryClick(){
 
                 //添加动画
                 showStoryCardAnimation();
-
             } catch (err) {
                 console.error('加载分类内容失败:', err);
             } finally {
