@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-<!--     <title>小故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title> -->
     <title><%= storyTitle %> - <%= categoryName %> - 小故事铺 | 故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻</title>
     <link rel="icon" type="image/png" href="/images/story.png">
     <link rel="preload" href="/stylesheets/read.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -31,12 +30,6 @@
 
                     <div class="article-meta">
                         <h2 class="article-account-name" id="storyType"><%=categoryName %></h2>
-<!--                         <div class="article-account"> -->
-<!--                             <div class="article-account-info"> -->
-<!--                                  -->
-<!--                             </div> -->
-<!--                         </div> -->
-
                         <!-- 语音朗读控制按钮 -->
                         <div class="tts-controls">
                             <button class="tts-button" id="ttsPlayButton" title="开始朗读">
@@ -50,10 +43,23 @@
                     </div>
                 </div>
 
-                <div class="article-content" id="storyContent"><% contentList.forEach(function(content){ %><p style="opacity: 0; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p><% }); %></div>
+                <div class="article-content" id="storyContent"><% contentList.forEach(function(content){ %><p style="opacity: 1; transform: translateY(0px); transition: opacity 0.5s, transform 0.5s;"><%=content %></p><% }); %></div>
             </div>
         </div>
     </main>
+<!--     <script> -->
+<!--         const pElementList = document.getElementById('storyContent').querySelectorAll('p'); -->
+<!--         pElementList.forEach((p, index) => { -->
+<!--             setTimeout(() => { -->
+<!--                 // 短暂延迟后显示段落 -->
+<!--                 setTimeout(() => { -->
+<!--                     p.style.transition = 'opacity 0.5s ease, transform 0.5s ease'; -->
+<!--                     p.style.opacity = '1'; -->
+<!--                     p.style.transform = 'translateY(0)'; -->
+<!--                 }, 50); -->
+<!--             }, 100 * Math.min(index, 5)); // 最多延迟5段，防止过长的故事有太长的加载时间 -->
+<!--         }); -->
+<!--     </script> -->
     <script src="/javascripts/read.js" defer></script>
 </body>
 </html>

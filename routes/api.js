@@ -173,7 +173,7 @@ router.get('/story/:id', async (req, res) => {
         console.log(error);
     }
     const contentList = storyContent.content.split('\n').filter(p => p.trim() !== '');
-    res.render('read', {
+    res.render('read/read', {
         contentList: contentList,
         storyTitle: storyMain.title,
         categoryName: storyMain.category_name,
@@ -183,7 +183,7 @@ router.get('/story/:id', async (req, res) => {
 router.get('/story/home/index', async (req, res) => {
     const options = {limit: 20}
     let {data, error} = await supabase.randomFetchData('story_main', options);
-    res.render('redirect/index', {
+    res.render('home/index', {
         storyList: data,
         title: '推荐故事'
     });
@@ -217,7 +217,7 @@ router.get('/story/search/page', async (req, res) => {
     } else {
         const options = {limit: 20}
         let {data, error} = await supabase.randomFetchData('story_main', options);
-        res.render('search', {
+        res.render('search/search', {
             storyList: data,
             title: '推荐故事'
         });

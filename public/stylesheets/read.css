@@ -77,7 +77,7 @@ body {
     align-items: center;
     background-color: var(--surface-color);
     border-radius: var(--card-radius);
-    /* box-shadow: var(--card-shadow); */
+    box-shadow: var(--card-shadow);
     /* margin-bottom: 0; */
 }
 
@@ -171,16 +171,6 @@ body {
     flex-wrap: wrap;
     margin-bottom: 28px;
     gap: 24px;
-}
-
-.article-account {
-    display: flex;
-    align-items: center;
-}
-
-.article-account-info {
-    display: flex;
-    flex-direction: column;
 }
 
 .article-account-name {

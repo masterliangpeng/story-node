@@ -7,18 +7,6 @@ const elements = {
 document.addEventListener('DOMContentLoaded', ()=>{
     checkSavedTheme();
 
-    const pElementList = document.getElementById('storyContent').querySelectorAll('p');
-    pElementList.forEach((p, index) => {
-        setTimeout(() => {
-            // 短暂延迟后显示段落
-            setTimeout(() => {
-                p.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                p.style.opacity = '1';
-                p.style.transform = 'translateY(0)';
-            }, 50);
-        }, 100 * Math.min(index, 5)); // 最多延迟5段，防止过长的故事有太长的加载时间
-    });
-
     elements.ttsPlayButton.addEventListener('click',ttsPlay);
     elements.ttsReplayButton.addEventListener('click',ttsReplay);
 })

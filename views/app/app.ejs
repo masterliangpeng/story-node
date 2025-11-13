@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>小故事铺 - 各类精彩故事在线阅读平台</title>
     <link rel="icon" type="image/png" href="/images/story.png">
-    <link rel="stylesheet" href="/stylesheets/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/stylesheets/appCss.css">
+    <link rel="preload" href="/stylesheets/appCss.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <script async src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b"></script>
     <!-- PC端检测脚本 -->
     <script>
         // 检测PC端设备并跳转
@@ -117,6 +118,6 @@
 
     <!-- 遮罩层 -->
     <div class="overlay" id="overlay" style="display: none;"></div>
-    <script src="/javascripts/appJs.js"></script>
+    <script src="/javascripts/appJs.js" defer></script>
 </body>
 </html>

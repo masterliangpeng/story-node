@@ -3,7 +3,7 @@ const router = express.Router();
 const supabase = require('./server');
 
 router.get('/', async function(req, res, next) {
-    res.render('app')
+    res.render('app/app')
 });
 
 //获取故事列表
