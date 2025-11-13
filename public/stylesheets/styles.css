@@ -94,6 +94,8 @@ header {
     align-items: center;
     transition: transform 0.3s ease;
     padding: 4px 0;  /* 添加一些垂直内边距 */
+    text-decoration:none;
+    color:inherit;
 }
 
 .logo:hover {

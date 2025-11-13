@@ -3,10 +3,10 @@
   <head>
     <title>小故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title>
     <link rel="icon" type="image/png" href="/images/story.png">
-    <link rel='stylesheet' href='/stylesheets/styles.css' />
-    <link rel='stylesheet' href='/stylesheets/all.min.css' />
+    <link rel="preload" href="/stylesheets/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/stylesheets/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b" async></script>
 
     <link rel="canonical" href="https://www.storynook.cn/">
 
@@ -23,10 +23,10 @@
             <div class="sidebar-inner">
                 <!-- 侧边栏顶部 -->
                 <div class="sidebar-header">
-                    <div class="logo">
-                        <img src="/images/story.png" alt="小故事铺" class="logo-img">
+                    <a href="/" class="logo">
+                        <img src="/images/story.png" alt="小故事铺" class="logo-img" loading="lazy" decoding="async"/>
                         <span>小故事铺</span>
-                    </div>
+                    </a>
                     <button class="sidebar-close" id="sidebarClose">
                         <i class="fas fa-chevron-left"></i>
                     </button>
@@ -189,6 +189,6 @@
         </div>
      </div>
 
-    <script src="/javascripts/main.js"></script>
+    <script src="/javascripts/main.js" defer></script>
   </body>
 </html>

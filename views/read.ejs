@@ -3,42 +3,48 @@
 <head>
     <meta charset="UTF-8">
 <!--     <title>小故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title> -->
-    <title><%= storyTitle %>：一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型的故事平台 - <%= categoryName %> - 小故事铺</title>
+    <title><%= storyTitle %> - <%= categoryName %> - 小故事铺 | 故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻</title>
     <link rel="icon" type="image/png" href="/images/story.png">
-    <link rel="stylesheet" href="/stylesheets/read.css">
-    <link rel="stylesheet" href="/stylesheets/all.min.css">
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b"></script>
+    <link rel="preload" href="/stylesheets/read.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/stylesheets/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <script async src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b"></script>
 </head>
 
 <body>
+    <header class="site-header">
+        <div class="container">
+            <div class="site-header-content">
+                <a href="/" class="site-brand">
+                    <img src="/images/story.png" alt="小故事铺" class="site-logo" loading="lazy" decoding="async"/>
+                    <span class="site-title">小故事铺</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
     <main class="main-container" id="mainContainer">
         <div class="container">
             <!-- 阅读页面视图 -->
             <div class="article-view">
                 <div class="article-header">
-                    <a class="back-btn" href="/" aria-label="回到主页">
-                        <img src="/images/story.png" alt="小故事铺 Logo" class="back-logo">
-                        <span>回到主页</span>
-                    </a>
-
                     <h1 class="article-title" id="storyTitle"><%=storyTitle %></h1>
 
                     <div class="article-meta">
-                        <div class="article-account">
-                            <div class="article-account-info">
-                                <div class="article-account-name" id="storyType"><%=categoryName %></div>
-                                <div class="article-date" id="storyReadTime"></div>
-                            </div>
-                        </div>
+                        <h2 class="article-account-name" id="storyType"><%=categoryName %></h2>
+<!--                         <div class="article-account"> -->
+<!--                             <div class="article-account-info"> -->
+<!--                                  -->
+<!--                             </div> -->
+<!--                         </div> -->
 
                         <!-- 语音朗读控制按钮 -->
                         <div class="tts-controls">
                             <button class="tts-button" id="ttsPlayButton" title="开始朗读">
-                                <img src="/images/play.png" alt="开始朗读" class="play-icon">
+                                <img src="/images/play.png" alt="开始朗读" class="play-icon" loading="lazy" decoding="async"/>
                             </button>
 
                             <button class="tts-button" id="ttsReplayButton" title="重播">
-                                <img src="/images/replay.png" alt="重播" class="replay-icons">
+                                <img src="/images/replay.png" alt="重播" class="replay-icons" loading="lazy" decoding="async"/>
                             </button>
                         </div>
                     </div>
@@ -48,6 +54,6 @@
             </div>
         </div>
     </main>
-    <script src="/javascripts/read.js"></script>
+    <script src="/javascripts/read.js" defer></script>
 </body>
 </html>

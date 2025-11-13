@@ -182,7 +182,7 @@ function showWelcomeAnimation() {
     welcomeOverlay.innerHTML = `
         <div class="welcome-content">
             <div class="welcome-icon">
-                <img src="/images/story.png" alt="小故事铺" class="logo-img">
+                <img src="/images/story.png" alt="小故事铺" class="logo-img" loading="lazy" decoding="async"/>
             </div>
             <h1 class="welcome-title">小故事铺</h1>
             <p class="welcome-text">${welcomeText}</p>
