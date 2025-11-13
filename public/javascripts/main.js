@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 添加滚动事件监听
     window.addEventListener('scroll', handleScroll);
 
+    //重置滚动条
+    window.scrollTo(0, 0);
     // 为新添加的卡片添加淡入动画
     //showStoryCardAnimation();
 });

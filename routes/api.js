@@ -103,10 +103,8 @@ router.get('/story/list/:activeCategoryId/:page', async (req, res) => {
             if (!isNullOrUndefined(selectedCategoryIds)) {
                 options.filterIn = {'id': JSON.parse(selectedCategoryIds)};
             }
-            console.log('selectedCategoryIds:', selectedCategoryIds)
             let {data, error} = await supabase.fetchData('story_category', options);
             categoryList = data;
-            console.log('categoryList:', categoryList)
             //initCategoryId(activeCategoryId, categoryList);
 
             if (isNullOrUndefined(selectedCategoryIds)) {
