@@ -138,6 +138,8 @@ function bindCategoryClick(){
                 const html = await res.text();
                 document.querySelector('#storyGrid').innerHTML = html;
 
+                //重新绑定点击事件
+                bindStoryClick();
                 // 更新浏览器地址（不会刷新页面）
                 history.pushState(null, '', href);
 
