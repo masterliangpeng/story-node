@@ -126,17 +126,19 @@ function bindCategoryClick(){
 
             // 异步加载分类内容
             try {
+
+                //const count = await fetchCount(activeCategoryId);
+
+                //const res = await fetch(href, {headers: {'X-Partial': 'true'}});
+                const [count, res] = await Promise.all([fetchCount(activeCategoryId), fetch(href, {headers: {'X-Partial': 'true'}})]);
+                const html = await res.text();
+                document.querySelector('#storyGrid').innerHTML = html;
                 //设置总页数
-                const count = await fetchCount(activeCategoryId);
                 let totalPages = Math.ceil(count / PAGE_MAX_SIZE);
                 currentState.totalPages = totalPages;
                 currentState.currentPage = 1;
                 // 重置分页状态
                 currentState.hasMoreData = currentState.currentPage < currentState.totalPages;
-
-                const res = await fetch(href, {headers: {'X-Partial': 'true'}});
-                const html = await res.text();
-                document.querySelector('#storyGrid').innerHTML = html;
 
                 //重新绑定点击事件
                 bindStoryClick();
