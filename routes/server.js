@@ -2,13 +2,7 @@ const supabase = require('./supabase.js');
 
 exports.fetchCount = async (tableName,options = {})=>{
     try{
-        let query = supabase.from(tableName).select('*', { count: 'exact', head: true });
-
-        if (options.filter) {
-            for (const [column, value] of Object.entries(options.filter)) {
-                query = query.eq(column, value);
-            }
-        }
+        let query = supabase.from(tableName).select('id', { count: 'estimated', head: true }).eq('category_id',options.filter.category_id);
 
         // 执行查询
         const { count, error } = await query;
