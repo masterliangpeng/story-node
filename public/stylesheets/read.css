@@ -90,8 +90,6 @@ body {
 }
 
 .site-logo {
-    width: 32px;
-    height: 32px;
     border-radius: 4px;
     object-fit: cover;
     animation: logoBounce 2.8s ease-in-out infinite;
