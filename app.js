@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public'),{
-  maxAge: '30d',           // 缓存30天
+  maxAge: '1d',           // 缓存30天
   etag: true,              // 启用ETag
   lastModified: true       // 启用Last-Modified
 }));

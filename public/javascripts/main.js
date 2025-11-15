@@ -187,7 +187,16 @@ function showWelcomeAnimation() {
     welcomeOverlay.innerHTML = `
         <div class="welcome-content">
             <div class="welcome-icon">
-                <img src="/images/story.png" alt="小故事铺" class="logo-img" decoding="async"/>
+<!--                <img src="/images/story.png" alt="小故事铺" class="logo-img" decoding="async"/>-->
+                <img
+                      src="/images/logo/favicon-32x32.png"
+                      srcset="/images/logo/favicon-16x16.png 16w,
+                      /images/logo/favicon-32x32.png 32w,
+                      /images/logo/apple-touch-icon.png 180w"
+                      class="logo-img"
+                      sizes="32px"
+                      decoding="async"
+                    />
             </div>
             <h1 class="welcome-title">小故事铺</h1>
             <p class="welcome-text">${welcomeText}</p>
