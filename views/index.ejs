@@ -2,11 +2,16 @@
 <html lang="zh-CN">
   <head>
     <title>小故事铺是一个专注于精选短篇故事的平台，涵盖睡前、恐怖、亲情、儿童等多个类型。每天更新精彩故事，陪你度过温暖或惊悚的时刻 - 小故事</title>
-    <link rel="icon" type="image/png" href="/images/story.png">
+<!--     <link rel="icon" type="image/png" href="/images/story.png"> -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/logo/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logo/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/logo/favicon-16x16.png">
+    <link rel="manifest" href="/images/logo/site.webmanifest">
+
     <link rel="preload" href="/stylesheets/styles.css?v=20251113" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="preload" href="/stylesheets/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 
-    <script async src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b" async></script>
+<!--     <script async src="https://cloud.umami.is/script.js" data-website-id="9ff3dec1-fc8a-41cd-8de1-84e40212d86b" async></script> -->
 
     <link rel="canonical" href="https://www.storynook.cn/">
 
@@ -32,7 +37,16 @@
                 <!-- 侧边栏顶部 -->
                 <div class="sidebar-header">
                     <a href="/" class="logo">
-                        <img src="/images/story.png" alt="小故事铺" class="logo-img" loading="lazy" decoding="async"/>
+<!--                         <img src="/images/story.png" alt="小故事铺" class="logo-img" style="width:35px;height:35px" decoding="async"/> -->
+                        <img
+                          src="/images/logo/favicon-32x32.png"
+                          srcset="/images/logo/favicon-16x16.png 16w,
+                          /images/logo/favicon-32x32.png 32w,
+                          /images/logo/apple-touch-icon.png 180w"
+                          sizes="32px"
+                          decoding="async"
+                          alt="小故事铺"
+                        />
                         <span>小故事铺</span>
                     </a>
                     <button class="sidebar-close" id="sidebarClose">
@@ -153,11 +167,11 @@
             <h3 id="homeModalTitle" class="home-modal-title">选择主页风格</h3>
             <div class="home-options" id="homeOptions">
                 <div class="home-option" data-home="home1">
-                    <img src="/images/home1.png" alt="主页一" loading="lazy" decoding="async" />
+                    <img src="/images/home1.png" alt="主页一" decoding="async"/>
                     <div class="home-option-label">主页一</div>
                 </div>
                 <div class="home-option" data-home="home2">
-                    <img src="/images/home2.png" alt="主页二" loading="lazy" decoding="async" />
+                    <img src="/images/home2.png" alt="主页二" decoding="async"/>
                     <div class="home-option-label">主页二</div>
                 </div>
             </div>

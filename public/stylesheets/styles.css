@@ -99,8 +99,6 @@ header {
 }
 
 .logo-img {
-    width: 35px;  /* 增加图片尺寸 */
-    height: 35px;
     margin-right: 10px;  /* 稍微减少右边距 */
     transition: transform 0.5s ease;
     object-fit: contain;  /* 确保图片比例正确 */
