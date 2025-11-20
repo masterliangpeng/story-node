@@ -170,11 +170,20 @@ router.get('/story/:id', async (req, res) => {
     } catch (error) {
         console.log(error);
     }
+    let recommendList;
+    try {
+        const options = {limit: 3};
+        let {data, error} = await supabase.randomFetchData('story_main', options);
+        recommendList = data;
+    } catch (error) {
+        console.log(error);
+    }
     const contentList = storyContent.content.split('\n').filter(p => p.trim() !== '');
     res.render('read/read', {
         contentList: contentList,
         storyTitle: storyMain.title,
         categoryName: storyMain.category_name,
+        recommendList: recommendList,
     });
 });
 
