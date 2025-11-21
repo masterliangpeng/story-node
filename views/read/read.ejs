@@ -68,10 +68,9 @@
                     <h2 class="recommend-header" id="recommendTitle">推荐故事</h2>
                     <ul class="recommend-list">
                         <% if (typeof recommendList !== 'undefined' && recommendList && recommendList.length > 0) { %>
-                        <% recommendList.slice(0, 3).forEach(function(story){ %>
+                        <% recommendList.forEach(function(story){ %>
                             <li class="recommend-item">
                                 <a class="recommend-link" href="/story/<%=story.id %>" target="_blank" rel="noopener"><%=story.title %></a>
-
                             </li>
                         <% }) %>
                         <% } %>
